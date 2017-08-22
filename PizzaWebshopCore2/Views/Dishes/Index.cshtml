@@ -24,8 +24,9 @@
         </div>
         <div class="col s12 m5 l4">
             <div style="opacity: 0.9">
-                <div class="collection" id="cart" style="overflow-y: scroll; max-height: 400px;"></div>  
-                <button class="waves-effect waves-light btn hide"><i class="material-icons right">checkout</i>Checkout</button>
+                <button id="btn-checkout" class="waves-effect waves-light btn disabled"><i class="material-icons right">checkout</i>Checkout</button>
+                <div class="collection" id="cart"></div>
+               
             </div>
         </div>
     </div>
@@ -44,67 +45,142 @@
 </style>
 <script type="text/javascript">
 
-    (function() {
-        var cart = document.getElementById('cart');
-        var addableDishes = document.getElementsByClassName('addToCart');
-
-        for (var i = 0; i < addableDishes.length; i++) {
-            addableDishes[i].addEventListener('click',
-                function() {
-                    var dish = this.value;
-                    addToCart(dish, cart);
-                });
-        }
-    })();
-
-    var addToCart = function(dish, cart) {
-        
-       
-        if (document.getElementById(dish)) {
-
-            var dishToUpdate = document.getElementById(dish);
-
-            var dishCount = dishToUpdate.children[0].innerText;
-            if (dishCount <= 0) {
-                dishCount = 1;
-            } else {
-                dishCount++;
+    cartHandler = {
+       cartItems: function() {
+           var items = document.getElementsByClassName('added-dish');
+           var itemsArr = [];
+           for (var i = 0; i < items.length; i++) {
+               var pizza = {
+                   Name: items[i].getAttribute('id'),
+                   Count: items[i].children[0].innerText
+               }
+               itemsArr.push(pizza);
+           }
+           return itemsArr;
+       },
+       init: function (cart, addableDishes) {
+            this.cart = cart;
+            this.addableDishes = addableDishes;
+            cartHandler.hookAddEvents();
+       },
+        cart: {},
+        addableDishes: {},
+        hookAddEvents: function() {
+            for (var i = 0; i < this.addableDishes.length; i++) {
+                this.addableDishes[i].addEventListener('click',
+                    function () {
+                        var dish = this.value;
+                        cartHandler.addToCart(dish);
+                    });
             }
-            dishToUpdate.children[0].innerText = dishCount;
+        },
+        updateDishCount: function (dish) {
+            var dishToUpdate = document.getElementById(dish);
+            dishToUpdate.children[0].innerText++;
+           
+        },
+       createNewDish: function(dish) {
+           var a = document.createElement('a');
 
+           a.setAttribute('id', dish);
+           a.classList.add('collection-item');
+           a.classList.add('added-dish');
 
-        } else {
-            var a = document.createElement('a');
+           var span = document.createElement('span');
+           span.classList.add('badge');
+           span.appendChild(document.createTextNode("1"));
 
-            a.setAttribute('id', dish);
-            a.classList.add('collection-item');
-            a.classList.add('added-dish');
-            var span = document.createElement('span');
-            span.classList.add('badge');
-            a.appendChild(span);
-            a.appendChild(document.createTextNode(dish));
+           a.appendChild(span);
+           a.appendChild(document.createTextNode(dish));
 
-            a.addEventListener('click',
-                function () {
-                    removeItemFromCart(this);
-                });
+           a.addEventListener('click',
+               function () {
+                   cartHandler.removeItemFromCart(this);
+               });
 
-            cart.appendChild(a);
+           this.cart.appendChild(a);
+       },
+        addToCart: function (dish) {
+
+            if (document.getElementById(dish)) {
+                cartHandler.updateDishCount(dish);
+
+            } else {
+                cartHandler.createNewDish(dish);
+            }
+
+            document.getElementById('btn-checkout').classList.remove('disabled');
+
+        },
+        removeItemFromCart: function (element) {
+            cartHandler.cartItems();
+            var dishCount = element.children[0].innerText;
+            if (dishCount <= 1) {
+                element.parentNode.removeChild(element);
+            } else {
+                element.children[0].innerText--;
+            }
+        
+        
+            if (!document.getElementsByClassName('added-dish').length) {
+                document.getElementById('btn-checkout').classList.add('disabled');
+            }
+        
         }
-       
-    };
+    }
+    
+    cartHandler.init(document.getElementById('cart'), document.getElementsByClassName('addToCart'));
+   
+    //var addToCart = function (dish, cart) {
+
+    //    if (document.getElementById(dish)) {
+    //    var dishToUpdate = document.getElementById(dish);
+
+    //    var dishCount = dishToUpdate.children[0].innerText;
+    //    if (dishCount <= 0) {
+    //        dishCount = 2;
+    //    } else {
+    //        dishCount++;
+    //    }
+    //    dishToUpdate.children[0].innerText = dishCount;
+
+    //    } else {
+    //    var a = document.createElement('a');
+
+    //    a.setAttribute('id', dish);
+    //    a.classList.add('collection-item');
+    //    a.classList.add('added-dish');
+    //    var span = document.createElement('span');
+    //    span.classList.add('badge');
+    //    a.appendChild(span);
+    //    a.appendChild(document.createTextNode(dish));
+
+    //    a.addEventListener('click',
+    //        function () {
+    //            removeItemFromCart(this);
+    //        });
+
+    //        cart.appendChild(a);
+    //    }
+
+    //   document.getElementById('btn-checkout').classList.remove('disabled');
+
+    //};
   
 
-    var removeItemFromCart = function (element) {
+    //var removeItemFromCart = function (element) {
         
-        var dishCount = element.children[0].innerText;
-        if (dishCount <= 1) {
-            element.parentNode.removeChild(element);
-        } else {
-            element.children[0].innerText--;
-        }
+    //    var dishCount = element.children[0].innerText;
+    //    if (dishCount <= 1) {
+    //        element.parentNode.removeChild(element);
+    //    } else {
+    //        element.children[0].innerText--;
+    //    }
         
         
+    //    if (!document.getElementsByClassName('added-dish').length) {
+    //        document.getElementById('btn-checkout').classList.add('disabled');
+    //    }
         
-    }
+    //}
 </script>
