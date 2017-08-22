@@ -10,16 +10,16 @@
 <body>
     <nav class="white">
         <div class="nav-wrapper container">
-            <a href="#!" class="brand-logo">Logo</a>
+            <a href="/home/index" class="brand-logo">Logo</a>
             <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
             <ul class="right hide-on-med-and-down">
-                <li><a href="sass.html">Sass</a></li>
+                <li><a asp-controller="Dishes" asp-action="Index">Foods</a></li>
                 <li><a href="badges.html">Components</a></li>
                 <li><a href="collapsible.html">Javascript</a></li>
                 <li><a href="mobile.html">Mobile</a></li>
             </ul>
             <ul class="side-nav" id="mobile-demo">
-                <li><a href="sass.html">Sass</a></li>
+                <li><a asp-controller="Dishes" asp-action="Index">Foods</a></li>
                 <li><a href="badges.html">Components</a></li>
                 <li><a href="collapsible.html">Javascript</a></li>
                 <li><a href="mobile.html">Mobile</a></li>
@@ -37,6 +37,12 @@
 <style>
     nav ul a, nav .brand-logo {
         color: #444;
+    }
+    body {
+        background-image: url(/images/landing-page.jpeg);
+        background-size: cover;
+        background-position: center;
+        height: 91.5vh;
     }
 </style>
 </body>
