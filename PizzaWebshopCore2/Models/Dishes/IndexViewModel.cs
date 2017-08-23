@@ -5,5 +5,6 @@ namespace PizzaWebshopCore2.Models.Dishes
     public class IndexViewModel
     {
         public IReadOnlyList<DishModel> Dishes { get; set; }
+        public IReadOnlyList<IngredientModel> Ingredients { get; set; }
     }
 }

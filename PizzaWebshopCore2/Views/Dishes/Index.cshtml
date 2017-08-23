@@ -1,4 +1,5 @@
-﻿@model PizzaWebshopCore2.Models.Dishes.IndexViewModel
+﻿
+@model PizzaWebshopCore2.Models.Dishes.IndexViewModel
 <div class="container">
     <div class="row">
         <h1>Pizzas</h1>
@@ -21,6 +22,28 @@
                     </div>
                 </div>
             }
+            <div style="opacity: 0.9" class="card blue-grey darken-1">
+                <div class="card-content white-text">
+                    <span class="card-title">Custom Pizza</span>
+                    <div id="custom-dish">
+                        @foreach (var ingredient in Model.Ingredients)
+                        {
+                            <p style="display: inline;">
+                                <input value="@ingredient.Name" class="filled-in ingredient-checkbox" type="checkbox" id="@ingredient.Id" />
+                                <label for="@ingredient.Id">@ingredient.Name</label>
+                            </p>
+
+                        }
+                    
+                    </div>
+                    
+                    
+                </div>
+                <div class="card-action">
+                    <button value="custom" class="waves-effect waves-light btn addToCart"><i class="material-icons left">add</i>Add</button>
+
+                </div>
+            </div>
         </div>
         <div class="col s12 m5 l4">
             <div style="opacity: 0.9">
@@ -31,7 +54,7 @@
         </div>
     </div>
 </div>
-
+<button onclick="cartHandler.checkout">check cart</button>
 
     
 
@@ -43,26 +66,60 @@
         border: 0;
     }
 </style>
+<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.2.1.min.js"></script>
 <script type="text/javascript">
+    
 
+   
     cartHandler = {
-       cartItems: function() {
-           var items = document.getElementsByClassName('added-dish');
-           var itemsArr = [];
-           for (var i = 0; i < items.length; i++) {
-               var pizza = {
-                   Name: items[i].getAttribute('id'),
-                   Count: items[i].children[0].innerText
-               }
-               itemsArr.push(pizza);
-           }
-           return itemsArr;
-       },
-       init: function (cart, addableDishes) {
+        cartItems: function() {
+            var dishes = document.getElementsByClassName('added-dish');
+            
+            var dishArr = [];
+            for (var i = 0; i < dishes.length; i++) {
+                var dish = { name: "", count: "", ingredients: [] };
+                
+                var name = dishes[i].getAttribute('id');
+                if (!name) {
+                    dish.name = "Custom";
+                    var ingredients = dishes[i].children[0].innerText.split(',');
+                    for (var j = 0; j < ingredients.length; j++) {
+                        var ingredient = { name: ingredients[j] }
+                        dish.ingredients.push(ingredient);
+                    }
+                     
+                  
+                } else {
+                    dish.name = name;
+                    dish.count = dishes[i].children[0].innerText;
+
+                }
+                dishArr.push(dish);
+            }
+            var order = { dishes: dishArr }
+            
+            return order;
+        },
+        init: function (cart, addableDishes) {
             this.cart = cart;
             this.addableDishes = addableDishes;
             cartHandler.hookAddEvents();
-       },
+            cartHandler.hookCheckoutEvent();
+        },
+        checkout: function () {
+            var orderJson = cartHandler.cartItems();
+            $.ajax({
+                type: 'POST',
+                url: '/dishes/checkout',
+                data: JSON.stringify(orderJson),
+                contentType: "application/json; charset=utf-8"
+            });
+        },
+        hookCheckoutEvent: function() {
+            document.getElementById('btn-checkout').addEventListener('click', function() {
+                cartHandler.checkout();
+            });
+        },
         cart: {},
         addableDishes: {},
         hookAddEvents: function() {
@@ -77,50 +134,85 @@
         updateDishCount: function (dish) {
             var dishToUpdate = document.getElementById(dish);
             dishToUpdate.children[0].innerText++;
-           
+            return true;
         },
-       createNewDish: function(dish) {
-           var a = document.createElement('a');
+        createNewDish: function(dish) {
+            var a = document.createElement('a');
 
-           a.setAttribute('id', dish);
-           a.classList.add('collection-item');
-           a.classList.add('added-dish');
+            a.setAttribute('id', dish);
+            a.classList.add('collection-item');
+            a.classList.add('added-dish');
 
-           var span = document.createElement('span');
-           span.classList.add('badge');
-           span.appendChild(document.createTextNode("1"));
+            var span = document.createElement('span');
+            span.classList.add('badge');
+            span.appendChild(document.createTextNode("1"));
 
-           a.appendChild(span);
-           a.appendChild(document.createTextNode(dish));
+            a.appendChild(span);
+            a.appendChild(document.createTextNode(dish));
 
-           a.addEventListener('click',
-               function () {
-                   cartHandler.removeItemFromCart(this);
-               });
+            a.addEventListener('click',
+                function () {
+                    cartHandler.removeItemFromCart(this);
+                });
 
-           this.cart.appendChild(a);
-       },
+            this.cart.appendChild(a);
+            return true;
+        },
+        addCustomDish: function () {
+            var ingredients = document.querySelectorAll('#custom-dish input[type="checkbox"]:checked');
+            if (!ingredients.length) {
+                return false;
+            }
+            var ingredientsArr = [];
+            ingredients.forEach(function(i) {
+                ingredientsArr.push(i.value);
+            });
+
+            var a = document.createElement('a');
+            var span = document.createElement('span');
+            
+            a.classList.add('collection-item');
+            a.classList.add('added-dish');
+            span.classList.add('badge');
+            span.appendChild(document.createTextNode(ingredientsArr.join()));
+            a.appendChild(span);
+            a.appendChild(document.createTextNode('Custom'));
+            a.addEventListener('click',
+                function () {
+                    cartHandler.removeItemFromCart(this);
+                });
+
+            this.cart.appendChild(a);
+            return true;
+        },
         addToCart: function (dish) {
-
-            if (document.getElementById(dish)) {
-                cartHandler.updateDishCount(dish);
+            var res;
+            if (dish === "custom") {
+                res = cartHandler.addCustomDish();
+            }
+            else if (document.getElementById(dish)) {
+                res = cartHandler.updateDishCount(dish);
 
             } else {
-                cartHandler.createNewDish(dish);
+                res = cartHandler.createNewDish(dish);
             }
 
-            document.getElementById('btn-checkout').classList.remove('disabled');
+            if(res)
+                document.getElementById('btn-checkout').classList.remove('disabled');
 
         },
         removeItemFromCart: function (element) {
-            cartHandler.cartItems();
+           
             var dishCount = element.children[0].innerText;
-            if (dishCount <= 1) {
+            
+            if (element.innerText.indexOf('Custom') !== -1) {
+                element.parentNode.removeChild(element);
+            }
+            else if (dishCount <= 1) {
                 element.parentNode.removeChild(element);
             } else {
                 element.children[0].innerText--;
             }
-        
         
             if (!document.getElementsByClassName('added-dish').length) {
                 document.getElementById('btn-checkout').classList.add('disabled');
@@ -130,57 +222,5 @@
     }
     
     cartHandler.init(document.getElementById('cart'), document.getElementsByClassName('addToCart'));
-   
-    //var addToCart = function (dish, cart) {
 
-    //    if (document.getElementById(dish)) {
-    //    var dishToUpdate = document.getElementById(dish);
-
-    //    var dishCount = dishToUpdate.children[0].innerText;
-    //    if (dishCount <= 0) {
-    //        dishCount = 2;
-    //    } else {
-    //        dishCount++;
-    //    }
-    //    dishToUpdate.children[0].innerText = dishCount;
-
-    //    } else {
-    //    var a = document.createElement('a');
-
-    //    a.setAttribute('id', dish);
-    //    a.classList.add('collection-item');
-    //    a.classList.add('added-dish');
-    //    var span = document.createElement('span');
-    //    span.classList.add('badge');
-    //    a.appendChild(span);
-    //    a.appendChild(document.createTextNode(dish));
-
-    //    a.addEventListener('click',
-    //        function () {
-    //            removeItemFromCart(this);
-    //        });
-
-    //        cart.appendChild(a);
-    //    }
-
-    //   document.getElementById('btn-checkout').classList.remove('disabled');
-
-    //};
-  
-
-    //var removeItemFromCart = function (element) {
-        
-    //    var dishCount = element.children[0].innerText;
-    //    if (dishCount <= 1) {
-    //        element.parentNode.removeChild(element);
-    //    } else {
-    //        element.children[0].innerText--;
-    //    }
-        
-        
-    //    if (!document.getElementsByClassName('added-dish').length) {
-    //        document.getElementById('btn-checkout').classList.add('disabled');
-    //    }
-        
-    //}
 </script>

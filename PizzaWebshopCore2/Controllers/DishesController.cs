@@ -38,12 +38,39 @@ namespace PizzaWebshopCore2.Controllers
                 
             }).ToList();
 
+            var ingredients = _context.Ingredients.ToList();
+
+            var ingredientsTransformed = ingredients.Select(i => new IngredientModel
+            {
+                Id = i.Id,
+                Name = i.Name
+            }).ToList();
+
             var viewModel = new IndexViewModel
             {
-                Dishes = dishesTransformed
+                Dishes = dishesTransformed,
+                Ingredients = ingredientsTransformed
             };
 
             return View(viewModel);
         }
+
+        [HttpPost]
+        [Route("checkout")]
+        public JsonResult Checkout([FromBody] OrderJson orderJson )
+        {
+            return Json("success");
+        }
+    }
+
+    public class Person
+    {
+        public string Name { get; set; }
+        public List<Beer> Beers { get; set; }
+    }
+
+    public class Beer
+    {
+        public string Name { get; set; }
     }
 }
