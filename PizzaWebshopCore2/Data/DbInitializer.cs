@@ -31,9 +31,9 @@ namespace PizzaWebshopCore2.Data
 
             if (!context.Dishes.Any())
             {
-                var cheese = new Ingredient { Name = "Cheese" };
-                var tomato = new Ingredient { Name = "Tomato" };
-                var ham = new Ingredient { Name = "Ham" };
+                var cheese = new Ingredient { Name = "Cheese", Price = 25};
+                var tomato = new Ingredient { Name = "Tomato", Price = 30};
+                var ham = new Ingredient { Name = "Ham", Price = 25};
 
                 var capricciosa = new Dish { Name = "Capricciosa", Price = 80 };
                 var margarita = new Dish { Name = "Margarita", Price = 70 };
@@ -42,9 +42,9 @@ namespace PizzaWebshopCore2.Data
                 var margaritaCheese = new DishIngredient { Dish = margarita, Ingredient = cheese };
                 var margaritaHam = new DishIngredient { Dish = margarita, Ingredient = ham };
 
-                var hawaiiCheese = new DishIngredient { Dish = hawaii, Ingredient = tomato };
+                var hawaiiCheese = new DishIngredient { Dish = hawaii, Ingredient = cheese };
 
-                var capricciosaCheese = new DishIngredient { Dish = capricciosa, Ingredient = ham };
+                var capricciosaCheese = new DishIngredient { Dish = capricciosa, Ingredient = cheese };
                 var capricciosaTomato = new DishIngredient { Dish = capricciosa, Ingredient = tomato };
 
 

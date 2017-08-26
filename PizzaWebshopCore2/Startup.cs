@@ -36,6 +36,8 @@ namespace PizzaWebshopCore2
 
             services.AddTransient<UserManager<ApplicationUser>>();
             services.AddTransient<RoleManager<IdentityRole>>();
+            services.AddSession();
+
 
 
             services.AddMvc();
@@ -52,7 +54,8 @@ namespace PizzaWebshopCore2
                 app.UseBrowserLink();
                 app.UseDatabaseErrorPage();
             }
-           
+            app.UseSession();
+
 
 
 

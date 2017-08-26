@@ -1,4 +1,5 @@
 ﻿
+@using Microsoft.AspNetCore.Mvc
 @model PizzaWebshopCore2.Models.Dishes.IndexViewModel
 <div class="container">
     <div class="row">
@@ -17,7 +18,8 @@
                         }
                     </div>
                     <div class="card-action">
-                        <button value="@dish.Name" class="waves-effect waves-light btn addToCart"><i class="material-icons left">add</i>Add</button>
+                        <button value="@dish.Id" name="@dish.Name" class="waves-effect waves-light btn addToCart"><i class="material-icons left">add</i>Add</button>
+                        <span id="@dish.Name-price" class="right">@dish.Price sek</span>
 
                     </div>
                 </div>
@@ -29,7 +31,8 @@
                         @foreach (var ingredient in Model.Ingredients)
                         {
                             <p style="display: inline;">
-                                <input value="@ingredient.Name" class="filled-in ingredient-checkbox" type="checkbox" id="@ingredient.Id" />
+                                <input id="@ingredient.Name-price" hidden value="@ingredient.Price"/>
+                                <input value="@ingredient.Name" class="filled-in ingredient-checkbox" type="checkbox" id="@ingredient.Id"/>
                                 <label for="@ingredient.Id">@ingredient.Name</label>
                             </p>
 
@@ -41,20 +44,21 @@
                 </div>
                 <div class="card-action">
                     <button value="custom" class="waves-effect waves-light btn addToCart"><i class="material-icons left">add</i>Add</button>
-
+                    <span class="right"></span>
                 </div>
             </div>
         </div>
         <div class="col s12 m5 l4">
             <div style="opacity: 0.9">
                 <button id="btn-checkout" class="waves-effect waves-light btn disabled"><i class="material-icons right">checkout</i>Checkout</button>
+                <span style="padding: 5px; border-radius: 4px;" class="white">PRICE<span id="total-price"></span></span>
                 <div class="collection" id="cart"></div>
                
             </div>
         </div>
     </div>
 </div>
-<button onclick="cartHandler.checkout">check cart</button>
+
 
     
 
@@ -71,7 +75,15 @@
     
 
    
-    cartHandler = {
+    cartHandlerOld = {
+        totalPrice: function () {
+            var res = 0;
+            cartHandler.cartItemsObjects.forEach(function(item) {
+                res += item.price;
+            });
+            return res;
+        },
+        cartItemsObjects: [],
         cartItems: function() {
             var dishes = document.getElementsByClassName('added-dish');
             
@@ -126,20 +138,25 @@
             for (var i = 0; i < this.addableDishes.length; i++) {
                 this.addableDishes[i].addEventListener('click',
                     function () {
-                        var dish = this.value;
-                        cartHandler.addToCart(dish);
+                        cartHandler.addToCart(this);
                     });
             }
         },
-        updateDishCount: function (dish) {
-            var dishToUpdate = document.getElementById(dish);
+        updateDishCount: function (element) {
+            
+            var dishToUpdate = document.getElementById(element.value + "-dish");
             dishToUpdate.children[0].innerText++;
+            var price = document.getElementById(element.name + '-price').innerText.split(' ')[0];
+            price = parseInt(price);
+            var dishObj = {id: element.value, name: element.value, price: price };
+            this.cartItemsObjects.push(dishObj);
+            
             return true;
         },
-        createNewDish: function(dish) {
+        createNewDish: function (element) {
             var a = document.createElement('a');
-
-            a.setAttribute('id', dish);
+            
+            a.setAttribute('id', element.value + '-dish');
             a.classList.add('collection-item');
             a.classList.add('added-dish');
 
@@ -148,7 +165,7 @@
             span.appendChild(document.createTextNode("1"));
 
             a.appendChild(span);
-            a.appendChild(document.createTextNode(dish));
+            a.appendChild(document.createTextNode(element.name));
 
             a.addEventListener('click',
                 function () {
@@ -156,6 +173,11 @@
                 });
 
             this.cart.appendChild(a);
+            var price = document.getElementById(element.name + '-price').innerText.split(' ')[0];
+            price = parseInt(price);
+            var dishObj = {id: element.value, name: element.name, price: price };
+            this.cartItemsObjects.push(dishObj);
+           
             return true;
         },
         addCustomDish: function () {
@@ -168,6 +190,21 @@
                 ingredientsArr.push(i.value);
             });
 
+            var totalPrice = 0;
+            var ingredientsObjArr = [];
+            ingredientsArr.forEach(function(i) {
+                var price = document.getElementById(i + '-price').value;
+                
+                totalPrice += parseInt(price);
+
+                var ingredientObj = { name: i, price: parseInt(price) };
+                ingredientsObjArr.push(ingredientObj);
+
+            });
+            var dishId = new Date().getTime();
+            var dish = {id: dishId, name: 'Custom', price: totalPrice, ingredients: ingredientsObjArr };
+            this.cartItemsObjects.push(dish);
+            
             var a = document.createElement('a');
             var span = document.createElement('span');
             
@@ -176,6 +213,7 @@
             span.classList.add('badge');
             span.appendChild(document.createTextNode(ingredientsArr.join()));
             a.appendChild(span);
+            a.setAttribute('id', dishId + '-dish');
             a.appendChild(document.createTextNode('Custom'));
             a.addEventListener('click',
                 function () {
@@ -183,22 +221,29 @@
                 });
 
             this.cart.appendChild(a);
+
+
+
             return true;
         },
-        addToCart: function (dish) {
+        addToCart: function (element) {
+            console.log(element);
             var res;
-            if (dish === "custom") {
+            if (element.value === "custom") {
                 res = cartHandler.addCustomDish();
+                
             }
-            else if (document.getElementById(dish)) {
-                res = cartHandler.updateDishCount(dish);
+            else if (document.getElementById(element.value + '-dish')) {
+                res = cartHandler.updateDishCount(element);
 
             } else {
-                res = cartHandler.createNewDish(dish);
+                res = cartHandler.createNewDish(element);
             }
 
             if(res)
                 document.getElementById('btn-checkout').classList.remove('disabled');
+
+            document.getElementById('total-price').innerText = cartHandler.totalPrice();
 
         },
         removeItemFromCart: function (element) {
@@ -213,14 +258,53 @@
             } else {
                 element.children[0].innerText--;
             }
-        
+          
             if (!document.getElementsByClassName('added-dish').length) {
                 document.getElementById('btn-checkout').classList.add('disabled');
             }
+            
+            for (var i = 0; i < cartHandler.cartItemsObjects.length; i++) {
+                
+                if (cartHandler.cartItemsObjects[i].id + '-dish' === element.id) {
+                    cartHandler.cartItemsObjects.splice(i, 1);
+                    break;
+                }
+            }
+            document.getElementById('total-price').innerText = cartHandler.totalPrice();
         
         }
+
     }
     
-    cartHandler.init(document.getElementById('cart'), document.getElementsByClassName('addToCart'));
+    //cartHandler.init(document.getElementById('cart'), document.getElementsByClassName('addToCart'));
+
+    cartHandler = {
+        init: function() {
+            cartHandler.hookAddEvents();
+        },
+        config: {
+            availableDishes: $('.addToCart'),
+            cartContainer: $('cart'),
+            totalPriceContainer: $('#total-price')
+        },
+        hookAddEvents: function() {
+            cartHandler.config.availableDishes.on('click', function() {
+                //addDishToCart(el);
+                cartHandler.addDishToSession(this);
+            });
+        },
+        addDishToSession: function (el) {
+            
+            $.ajax({
+                type: 'POST',
+                url: 'dishes/add-dish-to-session',
+                data: el.value,
+                contentType: "application/json; charset=utf-8"
+
+            });
+        }
+    }
+
+    cartHandler.init();
 
 </script>
