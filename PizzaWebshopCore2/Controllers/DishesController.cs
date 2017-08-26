@@ -95,7 +95,7 @@ namespace PizzaWebshopCore2.Controllers
             
             AddToSession(dishModel);
           
-            return Json("success");
+            return Json(dishModel);
         }
 
         [HttpPost]
@@ -119,12 +119,13 @@ namespace PizzaWebshopCore2.Controllers
             {
                 Id = new Random().Next(),
                 Name = "Custom",
-                Ingredients = ingredientsModel
+                Ingredients = ingredientsModel,
+                Price = ingredientsModel.Sum(i => i.Price)
 
             };
 
            AddToSession(dishModel);
-           return Json("success");
+           return Json(dishModel);
 
         }
 

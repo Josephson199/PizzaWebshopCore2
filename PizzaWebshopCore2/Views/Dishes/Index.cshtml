@@ -285,27 +285,31 @@
         config: {
             availableDishes: $('.addToCart'),
             customDish: $('#add-custom-dish-btn'),
-            cartContainer: $('cart'),
+            cartContainer: $('#cart'),
             totalPriceContainer: $('#total-price')
         },
         hookAddEvents: function() {
             cartHandler.config.availableDishes.on('click', function() {
                 //addDishToCart(el);
-                cartHandler.addDishToSession(this);
+               cartHandler.addDishToSession(this);
             });
             cartHandler.config.customDish.on('click', function() {
                 cartHandler.addCustomDishToSession();
             });
         },
         addDishToSession: function (el) {
-            
+           
             $.ajax({
                 type: 'POST',
                 url: 'dishes/add-dish-to-session',
                 data: el.value,
-                contentType: "application/json; charset=utf-8"
-
+                contentType: "application/json; charset=utf-8",
+                success: function (dish) {
+                    cartHandler.appendToCart(dish);
+                }
             });
+
+            
         },
         addCustomDishToSession: function () {
             var ingredients = document.querySelectorAll('#custom-dish input[type="checkbox"]:checked');
@@ -322,9 +326,56 @@
                 type: 'POST',
                 url: 'dishes/add-custom-dish-to-session',
                 data: JSON.stringify(ingredientIds),
-                contentType: "application/json"
+                contentType: "application/json",
+                success: function (dish) {
+                    cartHandler.appendToCart(dish);
+                }
             });
+        },
+        appendToCart: function (dish) {
+            if ($('#' + dish.id + '_dishId').length) {
+                cartHandler.updateDishCount(dish);
+            } else {
+                var a = document.createElement('a');
+            
+                a.setAttribute('id', dish.id + '_dishId');
+                a.classList.add('collection-item');
+                a.classList.add('added-dish');
+
+                var span = document.createElement('span');
+                span.classList.add('badge');
+                span.appendChild(document.createTextNode("1"));
+
+                a.appendChild(span);
+                a.appendChild(document.createTextNode(dish.name));
+                cartHandler.config.cartContainer.append(a);
+            }
+          
+            
+        },
+        updateDishCount(dish) {
+            var dishToUpdate = $('#' + dish.id + '_dishId');
+            
+            //dishToUpdate.children[0].innerText++;
+            var currentCount = dishToUpdate.children().first().text();
+            currentCount++;
+            dishToUpdate.children().first().text(currentCount);
+
+            
+        },
+        updateSessionWithExistingDish: function (dish) {
+
+            //$.ajax({
+            //    type: 'POST',
+            //    url: 'dishes/add-dish-to-session',
+            //    data: dish.id,
+            //    contentType: "application/json; charset=utf-8",
+            //    success: function (dish) {
+                    
+            //    }
+            //});
         }
+       
     }
 
     cartHandler.init();
