@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace PizzaWebshopCore2.Models.Dishes
 {
@@ -8,5 +9,10 @@ namespace PizzaWebshopCore2.Models.Dishes
         public string Name { get; set; }
         public int Price { get; set; }
         public List<IngredientModel> Ingredients { get; set; }
+
+        public int IngredientCosts
+        {
+            get { return Ingredients.Sum(i => i.Price); }
+        }
     }
 }

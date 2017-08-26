@@ -43,7 +43,7 @@
                     
                 </div>
                 <div class="card-action">
-                    <button value="custom" class="waves-effect waves-light btn addToCart"><i class="material-icons left">add</i>Add</button>
+                    <button id="add-custom-dish-btn" value="custom" class="waves-effect waves-light btn"><i class="material-icons left">add</i>Add</button>
                     <span class="right"></span>
                 </div>
             </div>
@@ -284,6 +284,7 @@
         },
         config: {
             availableDishes: $('.addToCart'),
+            customDish: $('#add-custom-dish-btn'),
             cartContainer: $('cart'),
             totalPriceContainer: $('#total-price')
         },
@@ -291,6 +292,9 @@
             cartHandler.config.availableDishes.on('click', function() {
                 //addDishToCart(el);
                 cartHandler.addDishToSession(this);
+            });
+            cartHandler.config.customDish.on('click', function() {
+                cartHandler.addCustomDishToSession();
             });
         },
         addDishToSession: function (el) {
@@ -301,6 +305,24 @@
                 data: el.value,
                 contentType: "application/json; charset=utf-8"
 
+            });
+        },
+        addCustomDishToSession: function () {
+            var ingredients = document.querySelectorAll('#custom-dish input[type="checkbox"]:checked');
+            if (!ingredients.length) {
+                return false;
+            }
+            var ingredientIds = new Array();
+            ingredients.forEach(function (i) {
+                ingredientIds.push(parseInt(i.id));
+                
+            });
+            
+            $.ajax({
+                type: 'POST',
+                url: 'dishes/add-custom-dish-to-session',
+                data: JSON.stringify(ingredientIds),
+                contentType: "application/json"
             });
         }
     }

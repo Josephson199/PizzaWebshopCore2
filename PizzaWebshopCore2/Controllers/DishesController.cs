@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -72,11 +73,18 @@ namespace PizzaWebshopCore2.Controllers
         [Route("add-dish-to-session")]
         public JsonResult AddDishToSession([FromBody] int id)
         {
-            var dishModel = _context.Dishes.Select(d => new DishModel
+            var dishModel = _context.Dishes
+                .Select(d => new DishModel
             {
                 Id = d.Id,
                 Name = d.Name,
-                Price = d.Price
+                Price = d.Price,
+                Ingredients = d.DishIngredients.Select(di => new IngredientModel
+                {
+                    Id = di.Ingredient.Id,
+                    Name = di.Ingredient.Name,
+                    Price = di.Ingredient.Price
+                }).ToList()
             })
             .FirstOrDefault(d => d.Id == id);
 
@@ -85,6 +93,44 @@ namespace PizzaWebshopCore2.Controllers
                 return Json("fail");
             }
             
+            AddToSession(dishModel);
+          
+            return Json("success");
+        }
+
+        [HttpPost]
+        [Route("add-custom-dish-to-session")]
+        public JsonResult AddCustomDishToSession([FromBody] int[] ingredientIds)
+        {
+            if (ingredientIds == null)
+            {
+                return Json("fail");
+            }
+           
+            var ingredientsModel = _context.Ingredients.Where(i => ingredientIds.Contains(i.Id))
+                .Select(i => new IngredientModel
+                {
+                    Id = i.Id,
+                    Name = i.Name,
+                    Price = i.Price
+                }).ToList();
+
+            var dishModel = new DishModel
+            {
+                Id = new Random().Next(),
+                Name = "Custom",
+                Ingredients = ingredientsModel
+
+            };
+
+           AddToSession(dishModel);
+           return Json("success");
+
+        }
+
+        private void AddToSession(DishModel dishModel)
+        {
+
             var cartSession = HttpContext.Session.GetString(SessionKeyName);
 
             if (cartSession == null)
@@ -92,7 +138,7 @@ namespace PizzaWebshopCore2.Controllers
                 var cart = new Cart
                 {
                     Dishes = new List<DishModel> { dishModel }
-                    
+
                 };
 
                 var serializedCart = JsonConvert.SerializeObject(cart);
@@ -109,7 +155,7 @@ namespace PizzaWebshopCore2.Controllers
                 HttpContext.Session.SetString(SessionKeyName, serializedCart);
             }
 
-            return Json("success");
+            
         }
     }
 }

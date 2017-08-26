@@ -13,7 +13,19 @@ namespace PizzaWebshopCore2.Models.Dishes
         {
             get
             {
-                return Dishes.Sum(dishModel => dishModel.Price);
+                var total = 0;
+                foreach (var dish in Dishes)
+                {
+                    if (dish.Price <= 0)
+                    {
+                        total += dish.IngredientCosts;
+                    }
+                    else
+                    {
+                        total += dish.Price;
+                    }
+                }
+                return total;
             }
             
         }
