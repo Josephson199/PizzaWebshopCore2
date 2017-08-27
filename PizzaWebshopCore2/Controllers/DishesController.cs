@@ -122,8 +122,14 @@ namespace PizzaWebshopCore2.Controllers
 
             };
 
-           AddToSession(dishModel);
-           return Json(dishModel);
+           var cart = AddToSession(dishModel);
+           var jsonDishResult = new JsonDishResult
+           {
+               Dish = dishModel,
+               CartPrice = cart.CartPrice
+           };
+
+           return Json(jsonDishResult);
 
         }
 
@@ -138,6 +144,33 @@ namespace PizzaWebshopCore2.Controllers
             }
 
             var cart = JsonConvert.DeserializeObject<Cart>(cartSession);
+
+            return Json(cart);
+        }
+
+        [HttpPost]
+        [Route("remove-dish-from-cart-session")]
+        public JsonResult RemoveDishFromCartSession([FromBody] int id)
+        {
+            var cartSession = HttpContext.Session.GetString(SessionKeyName);
+            if (cartSession == null)
+            {
+                return Json(new Cart());
+            }
+
+            var cart = JsonConvert.DeserializeObject<Cart>(cartSession);
+            var dishToRemove = cart.Dishes.Find(f => f.Id == id);
+
+            if (dishToRemove == null)
+            {
+                return Json(new Cart());
+            }
+
+            cart.Dishes.Remove(dishToRemove);
+
+
+            var serializedCart = JsonConvert.SerializeObject(cart);
+            HttpContext.Session.SetString(SessionKeyName, serializedCart);
 
             return Json(cart);
         }

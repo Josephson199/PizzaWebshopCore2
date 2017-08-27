@@ -74,211 +74,6 @@
 <script type="text/javascript">
     
 
-   
-    cartHandlerOld = {
-        totalPrice: function () {
-            var res = 0;
-            cartHandler.cartItemsObjects.forEach(function(item) {
-                res += item.price;
-            });
-            return res;
-        },
-        cartItemsObjects: [],
-        cartItems: function() {
-            var dishes = document.getElementsByClassName('added-dish');
-            
-            var dishArr = [];
-            for (var i = 0; i < dishes.length; i++) {
-                var dish = { name: "", count: "", ingredients: [] };
-                
-                var name = dishes[i].getAttribute('id');
-                if (!name) {
-                    dish.name = "Custom";
-                    var ingredients = dishes[i].children[0].innerText.split(',');
-                    for (var j = 0; j < ingredients.length; j++) {
-                        var ingredient = { name: ingredients[j] }
-                        dish.ingredients.push(ingredient);
-                    }
-                     
-                  
-                } else {
-                    dish.name = name;
-                    dish.count = dishes[i].children[0].innerText;
-
-                }
-                dishArr.push(dish);
-            }
-            var order = { dishes: dishArr }
-            
-            return order;
-        },
-        init: function (cart, addableDishes) {
-            this.cart = cart;
-            this.addableDishes = addableDishes;
-            cartHandler.hookAddEvents();
-            cartHandler.hookCheckoutEvent();
-        },
-        checkout: function () {
-            var orderJson = cartHandler.cartItems();
-            $.ajax({
-                type: 'POST',
-                url: '/dishes/checkout',
-                data: JSON.stringify(orderJson),
-                contentType: "application/json; charset=utf-8"
-            });
-        },
-        hookCheckoutEvent: function() {
-            document.getElementById('btn-checkout').addEventListener('click', function() {
-                cartHandler.checkout();
-            });
-        },
-        cart: {},
-        addableDishes: {},
-        hookAddEvents: function() {
-            for (var i = 0; i < this.addableDishes.length; i++) {
-                this.addableDishes[i].addEventListener('click',
-                    function () {
-                        cartHandler.addToCart(this);
-                    });
-            }
-        },
-        updateDishCount: function (element) {
-            
-            var dishToUpdate = document.getElementById(element.value + "-dish");
-            dishToUpdate.children[0].innerText++;
-            var price = document.getElementById(element.name + '-price').innerText.split(' ')[0];
-            price = parseInt(price);
-            var dishObj = {id: element.value, name: element.value, price: price };
-            this.cartItemsObjects.push(dishObj);
-            
-            return true;
-        },
-        createNewDish: function (element) {
-            var a = document.createElement('a');
-            
-            a.setAttribute('id', element.value + '-dish');
-            a.classList.add('collection-item');
-            a.classList.add('added-dish');
-
-            var span = document.createElement('span');
-            span.classList.add('badge');
-            span.appendChild(document.createTextNode("1"));
-
-            a.appendChild(span);
-            a.appendChild(document.createTextNode(element.name));
-
-            a.addEventListener('click',
-                function () {
-                    cartHandler.removeItemFromCart(this);
-                });
-
-            this.cart.appendChild(a);
-            var price = document.getElementById(element.name + '-price').innerText.split(' ')[0];
-            price = parseInt(price);
-            var dishObj = {id: element.value, name: element.name, price: price };
-            this.cartItemsObjects.push(dishObj);
-           
-            return true;
-        },
-        addCustomDish: function () {
-            var ingredients = document.querySelectorAll('#custom-dish input[type="checkbox"]:checked');
-            if (!ingredients.length) {
-                return false;
-            }
-            var ingredientsArr = [];
-            ingredients.forEach(function(i) {
-                ingredientsArr.push(i.value);
-            });
-
-            var totalPrice = 0;
-            var ingredientsObjArr = [];
-            ingredientsArr.forEach(function(i) {
-                var price = document.getElementById(i + '-price').value;
-                
-                totalPrice += parseInt(price);
-
-                var ingredientObj = { name: i, price: parseInt(price) };
-                ingredientsObjArr.push(ingredientObj);
-
-            });
-            var dishId = new Date().getTime();
-            var dish = {id: dishId, name: 'Custom', price: totalPrice, ingredients: ingredientsObjArr };
-            this.cartItemsObjects.push(dish);
-            
-            var a = document.createElement('a');
-            var span = document.createElement('span');
-            
-            a.classList.add('collection-item');
-            a.classList.add('added-dish');
-            span.classList.add('badge');
-            span.appendChild(document.createTextNode(ingredientsArr.join()));
-            a.appendChild(span);
-            a.setAttribute('id', dishId + '-dish');
-            a.appendChild(document.createTextNode('Custom'));
-            a.addEventListener('click',
-                function () {
-                    cartHandler.removeItemFromCart(this);
-                });
-
-            this.cart.appendChild(a);
-
-
-
-            return true;
-        },
-        addToCart: function (element) {
-
-
-            var res;
-            if (element.value === "custom") {
-                res = cartHandler.addCustomDish();
-                
-            }
-            else if (document.getElementById(element.value + '-dish')) {
-                res = cartHandler.updateDishCount(element);
-
-            } else {
-                res = cartHandler.createNewDish(element);
-            }
-
-            if(res)
-                document.getElementById('btn-checkout').classList.remove('disabled');
-
-            document.getElementById('total-price').innerText = cartHandler.totalPrice();
-
-        },
-        removeItemFromCart: function (element) {
-           
-            var dishCount = element.children[0].innerText;
-            
-            if (element.innerText.indexOf('Custom') !== -1) {
-                element.parentNode.removeChild(element);
-            }
-            else if (dishCount <= 1) {
-                element.parentNode.removeChild(element);
-            } else {
-                element.children[0].innerText--;
-            }
-          
-            if (!document.getElementsByClassName('added-dish').length) {
-                document.getElementById('btn-checkout').classList.add('disabled');
-            }
-            
-            for (var i = 0; i < cartHandler.cartItemsObjects.length; i++) {
-                
-                if (cartHandler.cartItemsObjects[i].id + '-dish' === element.id) {
-                    cartHandler.cartItemsObjects.splice(i, 1);
-                    break;
-                }
-            }
-            document.getElementById('total-price').innerText = cartHandler.totalPrice();
-        
-        }
-
-    }
-    
-    //cartHandler.init(document.getElementById('cart'), document.getElementsByClassName('addToCart'));
-
     cartHandler = {
         init: function() {
             cartHandler.hookAddEvents();
@@ -290,12 +85,13 @@
                 url: 'dishes/get-cart',
                 contentType: "application/json",
                 success: function (data) {
-                    data.dishes.forEach(function(dish) {
-                        cartHandler.appendToCart(dish);
+                    if (data.dishes) {
+                        data.dishes.forEach(function(dish) {
+                            cartHandler.appendToCart(dish);
                         
-                    });
-                    cartHandler.updateCartPrice(data.cartPrice);
-
+                        });
+                        cartHandler.updateCartPrice(data.cartPrice);
+                    }
                 }
             });
         },
@@ -303,7 +99,9 @@
             availableDishes: $('.addToCart'),
             customDish: $('#add-custom-dish-btn'),
             cartContainer: $('#cart'),
-            totalPriceContainer: $('#total-price')
+            totalPriceContainer: $('#total-price'),
+            btnCheckout: $('#btn-checkout'),
+            cart: $('#cart')
         },
         hookAddEvents: function() {
             cartHandler.config.availableDishes.on('click', function() {
@@ -350,10 +148,12 @@
             });
         },
         appendToCart: function (dish) {
-            if ($('#' + dish.id + '_dishId').length) {
+
+             if ($('#' + dish.id + '_dishId').length) {
                 cartHandler.updateDishCount(dish);
                 
             } else {
+
                 var a = document.createElement('a');
             
                 a.setAttribute('id', dish.id + '_dishId');
@@ -362,8 +162,20 @@
 
                 var span = document.createElement('span');
                 span.classList.add('badge');
-                span.appendChild(document.createTextNode("1"));
-
+                if (dish.name === "Custom") {
+                    var ingredrients = [];
+                    dish.ingredients.forEach(function(ingredient) {
+                        ingredrients.push(ingredient.name);
+                    });
+                    span.appendChild(document.createTextNode(ingredrients.join()));
+                } else {
+                    span.appendChild(document.createTextNode("1"));
+                }
+                
+                a.addEventListener('click',
+                     function () {
+                         cartHandler.removeItemFromCart(this);
+                     });
                 a.appendChild(span);
                 a.appendChild(document.createTextNode(dish.name));
                 cartHandler.config.cartContainer.append(a);
@@ -379,8 +191,45 @@
             dishToUpdate.children().first().text(currentCount);
         },
         updateCartPrice: function (cartPrice) {
+            if (cartPrice > 0) {
+                cartHandler.config.btnCheckout.removeClass('disabled');
+            }
             cartHandler.config.totalPriceContainer.text(cartPrice);
+            
+        },
+        removeItemFromCart: function (el) {
+            var dishId = $(el).attr('id');
+            var divider = dishId.indexOf('_');
+            var dishIdPure = dishId.substring(0, divider);
 
+            cartHandler.removeItemFromSession(dishIdPure);
+
+            var dishCount = $(el).children().first().text();
+
+            if ($(el).text().indexOf('Custom') !== -1 || dishCount <= 1) {
+                $(el).remove();
+            } else {
+                $(el).children().first().text(parseInt(dishCount) -1);
+            }
+
+            if (cartHandler.config.cart.children().length <= 0) {
+                cartHandler.config.btnCheckout.addClass('disabled');
+            }
+        },
+        removeItemFromSession: function (dishId) {
+            
+            $.ajax({
+                type: 'POST',
+                url: 'dishes/remove-dish-from-cart-session',
+                data: dishId,
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    cartHandler.updateCartPrice(data.cartPrice);
+                }
+            });
+        },
+        checkout: function() {
+            
         }
        
     }
