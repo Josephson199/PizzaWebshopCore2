@@ -227,7 +227,8 @@
             return true;
         },
         addToCart: function (element) {
-            console.log(element);
+
+
             var res;
             if (element.value === "custom") {
                 res = cartHandler.addCustomDish();
@@ -281,6 +282,22 @@
     cartHandler = {
         init: function() {
             cartHandler.hookAddEvents();
+            cartHandler.initCart();
+        },
+        initCart: function() {
+            $.ajax({
+                type: 'GET',
+                url: 'dishes/get-cart',
+                contentType: "application/json",
+                success: function (data) {
+                    data.dishes.forEach(function(dish) {
+                        cartHandler.appendToCart(dish);
+                        
+                    });
+                    cartHandler.updateCartPrice(data.cartPrice);
+
+                }
+            });
         },
         config: {
             availableDishes: $('.addToCart'),
@@ -290,7 +307,6 @@
         },
         hookAddEvents: function() {
             cartHandler.config.availableDishes.on('click', function() {
-                //addDishToCart(el);
                cartHandler.addDishToSession(this);
             });
             cartHandler.config.customDish.on('click', function() {
@@ -304,11 +320,11 @@
                 url: 'dishes/add-dish-to-session',
                 data: el.value,
                 contentType: "application/json; charset=utf-8",
-                success: function (dish) {
-                    cartHandler.appendToCart(dish);
+                success: function (data) {
+                    cartHandler.appendToCart(data.dish);
+                    cartHandler.updateCartPrice(data.cartPrice);
                 }
             });
-
             
         },
         addCustomDishToSession: function () {
@@ -327,14 +343,16 @@
                 url: 'dishes/add-custom-dish-to-session',
                 data: JSON.stringify(ingredientIds),
                 contentType: "application/json",
-                success: function (dish) {
-                    cartHandler.appendToCart(dish);
+                success: function (data) {
+                    cartHandler.appendToCart(data.dish);
+                    cartHandler.updateCartPrice(data.cartPrice);
                 }
             });
         },
         appendToCart: function (dish) {
             if ($('#' + dish.id + '_dishId').length) {
                 cartHandler.updateDishCount(dish);
+                
             } else {
                 var a = document.createElement('a');
             
@@ -356,24 +374,13 @@
         updateDishCount(dish) {
             var dishToUpdate = $('#' + dish.id + '_dishId');
             
-            //dishToUpdate.children[0].innerText++;
             var currentCount = dishToUpdate.children().first().text();
             currentCount++;
             dishToUpdate.children().first().text(currentCount);
-
-            
         },
-        updateSessionWithExistingDish: function (dish) {
+        updateCartPrice: function (cartPrice) {
+            cartHandler.config.totalPriceContainer.text(cartPrice);
 
-            //$.ajax({
-            //    type: 'POST',
-            //    url: 'dishes/add-dish-to-session',
-            //    data: dish.id,
-            //    contentType: "application/json; charset=utf-8",
-            //    success: function (dish) {
-                    
-            //    }
-            //});
         }
        
     }

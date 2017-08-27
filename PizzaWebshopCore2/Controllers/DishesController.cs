@@ -62,14 +62,6 @@ namespace PizzaWebshopCore2.Controllers
         }
 
         [HttpPost]
-        [Route("checkout")]
-        public JsonResult Checkout([FromBody] OrderJson orderJson )
-        {
-
-            return Json("success");
-        }
-
-        [HttpPost]
         [Route("add-dish-to-session")]
         public JsonResult AddDishToSession([FromBody] int id)
         {
@@ -93,9 +85,15 @@ namespace PizzaWebshopCore2.Controllers
                 return Json("fail");
             }
             
-            AddToSession(dishModel);
-          
-            return Json(dishModel);
+            var cart = AddToSession(dishModel);
+            
+            var jsonDishResult = new JsonDishResult
+            {
+                Dish = dishModel,
+                CartPrice = cart.CartPrice
+            };
+
+            return Json(jsonDishResult);
         }
 
         [HttpPost]
@@ -129,14 +127,33 @@ namespace PizzaWebshopCore2.Controllers
 
         }
 
-        private void AddToSession(DishModel dishModel)
+        [HttpGet]
+        [Route("get-cart")]
+        public JsonResult GetCart()
+        {
+            var cartSession = HttpContext.Session.GetString(SessionKeyName);
+            if (cartSession == null)
+            {
+                return Json(new Cart());
+            }
+
+            var cart = JsonConvert.DeserializeObject<Cart>(cartSession);
+
+            return Json(cart);
+        }
+
+
+
+        private Cart AddToSession(DishModel dishModel)
         {
 
             var cartSession = HttpContext.Session.GetString(SessionKeyName);
 
+            Cart cart;
+
             if (cartSession == null)
             {
-                var cart = new Cart
+                cart = new Cart
                 {
                     Dishes = new List<DishModel> { dishModel }
 
@@ -148,15 +165,15 @@ namespace PizzaWebshopCore2.Controllers
             }
             else
             {
-                var cartSessionDeserialized = JsonConvert.DeserializeObject<Cart>(cartSession);
-                cartSessionDeserialized.Dishes.Add(dishModel);
+                cart = JsonConvert.DeserializeObject<Cart>(cartSession);
+                cart.Dishes.Add(dishModel);
 
-                var serializedCart = JsonConvert.SerializeObject(cartSessionDeserialized);
+                var serializedCart = JsonConvert.SerializeObject(cart);
 
                 HttpContext.Session.SetString(SessionKeyName, serializedCart);
             }
 
-            
+            return cart;
         }
     }
 }
