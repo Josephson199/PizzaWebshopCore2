@@ -1,10 +1,8 @@
-﻿
-@using Microsoft.AspNetCore.Mvc
-@model PizzaWebshopCore2.Models.Dishes.IndexViewModel
+﻿@model PizzaWebshopCore2.Models.Dishes.IndexViewModel
 <div class="container">
     <div class="row">
         <h1>Pizzas</h1>
-        <div style="overflow-y: scroll; max-height: 70vh;" class="col s12 m7 l8">
+        <div style="overflow-y: scroll; height: 70vh;" class="col s12 m7 l8">
 
             @foreach (var dish in Model.Dishes)
             {
@@ -50,18 +48,69 @@
         </div>
         <div class="col s12 m5 l4">
             <div style="opacity: 0.9">
-                <button id="btn-checkout" class="waves-effect waves-light btn disabled"><i class="material-icons right">checkout</i>Checkout</button>
+                <a href="#modal-checkout" id="btn-checkout" class="waves-effect waves-light btn disabled modal-trigger"><i class="material-icons right">checkout</i>Checkout</a>
                 <span style="padding: 5px; border-radius: 4px;" class="white">PRICE<span id="total-price"></span></span>
                 <div class="collection" id="cart"></div>
-               
+
             </div>
         </div>
     </div>
 </div>
 
 
-    
-
+<div id="modal-checkout" class="modal">
+    <div class="modal-content">
+        <h4>Checkout</h4>
+        <div class="row">
+            <form class="col s12">
+                <div class="row">
+                    <div class="input-field col s6">
+                        <input id="first_name" type="text" class="validate">
+                        <label for="first_name">First Name</label>
+                    </div>
+                    <div class="input-field col s6">
+                        <input id="last_name" type="text" class="validate">
+                        <label for="last_name">Last Name</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s12">
+                        <input id="email" type="text" class="validate">
+                        <label for="email">Email</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s12">
+                        <input id="address" type="text" class="validate">
+                        <label for="address">Street</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s6">
+                        <input id="city" type="text" class="validate">
+                        <label for="city">City</label>
+                    </div>
+                    <div class="input-field col s6">
+                        <input id="postal_code" type="text" class="validate">
+                        <label for="postal_code">Postal Code</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s12">
+                        <input id="card_number" type="number" class="validate">
+                        <label for="card_number">Card Number</label>
+                    </div>
+                </div>
+                <button class="waves-effect waves-light btn" type="submit">Order</button>
+            </form>
+        </div>
+        
+    </div>
+    <div class="modal-footer">
+        <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Close</a>
+    </div>
+</div>
+          
 <style>
     .added-dish:hover {
         cursor: pointer;
@@ -76,7 +125,7 @@
 
     cartHandler = {
         init: function() {
-            cartHandler.hookAddEvents();
+            cartHandler.hookEvents();
             cartHandler.initCart();
         },
         initCart: function() {
@@ -103,13 +152,18 @@
             btnCheckout: $('#btn-checkout'),
             cart: $('#cart')
         },
-        hookAddEvents: function() {
+        hookEvents: function() {
             cartHandler.config.availableDishes.on('click', function() {
                cartHandler.addDishToSession(this);
             });
             cartHandler.config.customDish.on('click', function() {
                 cartHandler.addCustomDishToSession();
             });
+            //cartHandler.config.btnCheckout.on('click',
+            //    function() {
+            //        //window.location.href = "/dishes/checkout/";
+            //        $('#checkout-modal').modal('open');
+            //    });
         },
         addDishToSession: function (el) {
            
@@ -233,7 +287,11 @@
         }
        
     }
+            
 
-    cartHandler.init();
+    $(document).ready(function() {
+        cartHandler.init();
+        $('.modal').modal();
+    });
 
 </script>

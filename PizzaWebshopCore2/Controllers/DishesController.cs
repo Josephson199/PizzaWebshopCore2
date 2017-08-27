@@ -208,5 +208,28 @@ namespace PizzaWebshopCore2.Controllers
 
             return cart;
         }
+
+        [Route("checkout")]
+        public IActionResult Checkout()
+        {
+            
+            var cartSession = HttpContext.Session.GetString(SessionKeyName);
+            Cart cart;
+
+            if (cartSession == null)
+            {
+                cart = new Cart();
+            }
+            else
+            {
+                cart = JsonConvert.DeserializeObject<Cart>(cartSession);
+            }
+
+            var model = new CheckoutViewModel
+            {
+                Cart = cart
+            };
+            return View(model);
+        }
     }
 }
