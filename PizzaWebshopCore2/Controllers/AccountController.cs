@@ -59,6 +59,15 @@ namespace PizzaWebshopCore2.Controllers
             return View();
         }
 
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction(nameof(HomeController.Index), "Home");
+        }
+
         [HttpPost]
         [AllowAnonymous]
         [Route("register")]

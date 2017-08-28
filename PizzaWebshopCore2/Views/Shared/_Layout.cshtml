@@ -21,9 +21,18 @@
                 @if (!SignInManager.IsSignedIn(User))
                 {
                     <li><a asp-controller="Account" asp-action="Login">Login</a></li>
+                    <li><a asp-controller="Account" asp-action="Register">Register</a></li>
                 }
-                
-                <li><a asp-controller="Account" asp-action="Register">Register</a></li>
+                else
+                {
+                    <li><a asp-controller="Account" asp-action="Logout">Sign out</a></li>
+                }
+                @if (User.IsInRole("Admin"))
+                {
+                    <li><a asp-controller="Manage" asp-action="Index">Admin</a></li>
+                }
+
+               
                 
             </ul>
             <ul class="side-nav" id="mobile-demo">
