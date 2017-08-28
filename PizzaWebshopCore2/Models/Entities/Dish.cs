@@ -11,5 +11,6 @@ namespace PizzaWebshopCore2.Models.Entities
         public string Name { get; set; }
         public int Price { get; set; }
         public List<DishIngredient> DishIngredients { get; set; }
+        public List<DishOrder> DishOrders { get; set; }
     }
 }

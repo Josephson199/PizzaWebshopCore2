@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace PizzaWebshopCore2.Models.Dishes
 {
-    public class Cart
+    public class CartModel
     {
         public List<DishModel> Dishes { get; set; }
 

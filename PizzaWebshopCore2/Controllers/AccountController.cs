@@ -90,7 +90,7 @@ namespace PizzaWebshopCore2.Controllers
                 if (userResult.Succeeded)
                 {
                     await _signInManager.SignInAsync(newUser, isPersistent: false);
-                    RedirectToAction("Index", "Dishes");
+                    return RedirectToAction("Index", "Dishes");
 
                 }
                 foreach (var error in userResult.Errors)

@@ -1,5 +1,11 @@
 ﻿@using System.Linq
+@using System.Runtime.InteropServices.ComTypes
+@using Microsoft.AspNetCore.Identity
+@using PizzaWebshopCore2.Models
 @model PizzaWebshopCore2.Models.Dishes.IndexViewModel
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
 <div class="container">
     <div class="row">
         <h1>Pizzas</h1>
@@ -76,47 +82,84 @@
     <div class="modal-content">
         <h4>Checkout</h4>
         <div class="row">
-            <form class="col s12">
-                <div class="row">
-                    <div class="input-field col s6">
-                        <input id="first_name" type="text" class="validate">
-                        <label for="first_name">First Name</label>
+            @if (SignInManager.IsSignedIn(User))
+            {
+                
+                    ApplicationUser user = UserManager.GetUserAsync(User).Result;
+                
+                <form id="authorized-submit-form" class="col s12">
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input value="@user.Street" asp-for="PaymentInformationModel.Street" id="street" type="text" class="validate" required="required">
+                            <label for="street">Street</label>
+                        </div>
                     </div>
-                    <div class="input-field col s6">
-                        <input id="last_name" type="text" class="validate">
-                        <label for="last_name">Last Name</label>
+                    <div class="row">
+                        <div class="input-field col s6">
+                            <input value="@user.City" asp-for="PaymentInformationModel.City" id="city" type="text" class="validate" required="required">
+                            <label for="city">City</label>
+                        </div>
+                        <div class="input-field col s6">
+                            <input value="@user.PostalCode" asp-for="PaymentInformationModel.PostalCode" id="postal_code" type="text" class="validate" required="required">
+                            <label for="postal_code">Postal Code</label>
+                        </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="input-field col s12">
-                        <input id="email" type="text" class="validate">
-                        <label for="email">Email</label>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input asp-for="PaymentInformationModel.CardNumber" id="card_number" type="text" class="validate" required="required">
+                            <label for="card_number">Card Number</label>
+                        </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="input-field col s12">
-                        <input id="address" type="text" class="validate">
-                        <label for="address">Street</label>
+                    <button id="submit-authorized-form" class="waves-effect waves-light btn" type="submit">Order</button>
+                </form>
+               
+                
+            }
+            else
+            {
+                <form asp-action="SaveOrder" asp-controller="Dishes" asp-antiforgery="true" class="col s12">
+                    <div class="row">
+                        <div class="input-field col s6">
+                            <input asp-for="PaymentInformationModel.FirstName" id="first_name" type="text" class="validate">
+                            <label for="first_name">First Name</label>
+                        </div>
+                        <div class="input-field col s6">
+                            <input asp-for="PaymentInformationModel.LastName" id="last_name" type="text" class="validate">
+                            <label for="last_name">Last Name</label>
+                        </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="input-field col s6">
-                        <input id="city" type="text" class="validate">
-                        <label for="city">City</label>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input asp-for="PaymentInformationModel.Email" id="email" type="text" class="validate">
+                            <label for="email">Email</label>
+                        </div>
                     </div>
-                    <div class="input-field col s6">
-                        <input id="postal_code" type="text" class="validate">
-                        <label for="postal_code">Postal Code</label>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input asp-for="PaymentInformationModel.Street" id="street" type="text" class="validate">
+                            <label for="street">Street</label>
+                        </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="input-field col s12">
-                        <input id="card_number" type="number" class="validate">
-                        <label for="card_number">Card Number</label>
+                    <div class="row">
+                        <div class="input-field col s6">
+                            <input asp-for="PaymentInformationModel.City" id="city" type="text" class="validate">
+                            <label for="city">City</label>
+                        </div>
+                        <div class="input-field col s6">
+                            <input asp-for="PaymentInformationModel.PostalCode" id="postal_code" type="text" class="validate">
+                            <label for="postal_code">Postal Code</label>
+                        </div>
                     </div>
-                </div>
-                <button class="waves-effect waves-light btn" type="submit">Order</button>
-            </form>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input asp-for="PaymentInformationModel.CardNumber" id="card_number" type="number" class="validate">
+                            <label for="card_number">Card Number</label>
+                        </div>
+                    </div>
+                    <button class="waves-effect waves-light btn" type="submit">Order</button>
+                </form>
+            }
+         
         </div>
         
     </div>
@@ -172,7 +215,7 @@
         },
         hookEvents: function() {
             cartHandler.config.availableDishes.on('click', function() {
-               cartHandler.addDishToSession(this);
+                cartHandler.addDishToSession(this);
             });
             cartHandler.config.customDish.on('click', function() {
                 cartHandler.addCustomDishToSession();
@@ -231,17 +274,17 @@
             span.classList.add('badge'); 
             span.classList.add('ingred-name-italic');
                
-                var ingredrients = [];
-                dish.ingredients.forEach(function(ingredient) {
-                    ingredrients.push(ingredient.name);
-                });
-                span.appendChild(document.createTextNode(ingredrients.join()));
+            var ingredrients = [];
+            dish.ingredients.forEach(function(ingredient) {
+                ingredrients.push(ingredient.name);
+            });
+            span.appendChild(document.createTextNode(ingredrients.join()));
               
                 
             a.addEventListener('click',
-                    function () {
-                        cartHandler.removeItemFromCart(this);
-                    });
+                function () {
+                    cartHandler.removeItemFromCart(this);
+                });
             a.appendChild(span);
             a.appendChild(document.createTextNode(dish.name));
             cartHandler.config.cartContainer.append(a);
@@ -292,6 +335,28 @@
     $(document).ready(function() {
         cartHandler.init();
         $('.modal').modal();
+
+
+        $('#authorized-submit-form').submit(function(evt) {
+            evt.preventDefault();
+           var data = {
+               street: $('#street').val(),
+               city: $('#city').val(),
+               postalCode: $('#postal_code').val(),
+               cardNumber: $('#card_number').val()
+            }
+
+           $.ajax({
+                type: 'POST',
+                url: 'dishes/save-order-authorized',
+                data: JSON.stringify(data),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                  
+                }
+            });
+        });
+
     });
 
 </script>

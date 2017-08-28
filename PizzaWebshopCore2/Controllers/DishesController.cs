@@ -1,12 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using PizzaWebshopCore2.Data;
+using PizzaWebshopCore2.Models;
 using PizzaWebshopCore2.Models.Dishes;
+using PizzaWebshopCore2.Models.Entities;
 
 namespace PizzaWebshopCore2.Controllers
 {
@@ -15,11 +20,13 @@ namespace PizzaWebshopCore2.Controllers
     {
         private const string SessionKeyName = "_Cart";
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
         
 
-        public DishesController(ApplicationDbContext context)
+        public DishesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         public IActionResult Index()
@@ -55,7 +62,8 @@ namespace PizzaWebshopCore2.Controllers
             var viewModel = new IndexViewModel
             {
                 Dishes = dishesTransformed,
-                Ingredients = ingredientsTransformed
+                Ingredients = ingredientsTransformed,
+                PaymentInformationModel = new PaymentInformationModel()
             };
 
             return View(viewModel);
@@ -86,18 +94,6 @@ namespace PizzaWebshopCore2.Controllers
             {
                 return Json("fail");
             }
-
-            //if (dishJsonDto.IngredientIds.Any())
-            //{
-            //    var extraIngredients = _context.Ingredients.Where(i => dishJsonDto.IngredientIds.Contains(i.Id))
-            //        .Select(i => new IngredientModel
-            //        {
-            //            Id = i.Id,
-            //            Name = i.Name,
-            //            Price = i.Price
-            //        });
-            //    dishModel.Ingredients.AddRange(extraIngredients);
-            //}
 
             var cart = AddToSession(dishModel);
 
@@ -154,10 +150,10 @@ namespace PizzaWebshopCore2.Controllers
             var cartSession = HttpContext.Session.GetString(SessionKeyName);
             if (cartSession == null)
             {
-                return Json(new Cart());
+                return Json(new CartModel());
             }
 
-            var cart = JsonConvert.DeserializeObject<Cart>(cartSession);
+            var cart = JsonConvert.DeserializeObject<CartModel>(cartSession);
 
             return Json(cart);
         }
@@ -169,15 +165,15 @@ namespace PizzaWebshopCore2.Controllers
             var cartSession = HttpContext.Session.GetString(SessionKeyName);
             if (cartSession == null)
             {
-                return Json(new Cart());
+                return Json(new CartModel());
             }
 
-            var cart = JsonConvert.DeserializeObject<Cart>(cartSession);
+            var cart = JsonConvert.DeserializeObject<CartModel>(cartSession);
             var dishToRemove = cart.Dishes.Find(f => f.Id == id);
 
             if (dishToRemove == null)
             {
-                return Json(new Cart());
+                return Json(new CartModel());
             }
 
             cart.Dishes.Remove(dishToRemove);
@@ -189,18 +185,81 @@ namespace PizzaWebshopCore2.Controllers
             return Json(cart);
         }
 
+        [HttpPost]
+        [Route("save-order")]
+        public async Task<IActionResult> SaveOrder([FromBody] PaymentInformationModel paymentInformationModel)
+        {
+         
+            //save order
+            //email?
+            HttpContext.Session.Clear();
+            return RedirectToAction(nameof(HomeController.Index), "Home");
+        }
+
+        [HttpPost]
+        [Route("save-order-authorized")]
+        public async Task<IActionResult> SaveOrderAuthorized([FromBody] PaymentInformationModel paymentInformationModel)
+        {
+            //get user
+            var user = await _userManager.GetUserAsync(User);
+            var cartSession = HttpContext.Session.GetString(SessionKeyName);
+
+            if (user == null || cartSession == null)
+            {
+                return Json("fail");
+            }
+
+            var cart = JsonConvert.DeserializeObject<CartModel>(cartSession);
+
+            var order = new Order();
+
+            var dishes = cart.Dishes.Select(d => new Dish
+            {
+                Name = d.Name,
+                Id = d.Id,
+                Price = d.Price
+            });
+
+            foreach (var dish in cart.Dishes)
+            {
+                var ingredients = dish.Ingredients.Select(i => new Ingredient
+                {
+                    Name = i.Name,
+                    Id = i.Id,
+                    Price = i.Price
+                });
+
+            }
+            
 
 
-        private Cart AddToSession(DishModel dishModel)
+
+            order.ApplicationUser = user;
+            
+
+
+            
+
+            
+
+            //save order
+            //email?
+            HttpContext.Session.Clear();
+            return RedirectToAction(nameof(HomeController.Index), "Home");
+        }
+
+
+
+        private CartModel AddToSession(DishModel dishModel)
         {
 
             var cartSession = HttpContext.Session.GetString(SessionKeyName);
 
-            Cart cart;
+            CartModel cart;
 
             if (cartSession == null)
             {
-                cart = new Cart
+                cart = new CartModel
                 {
                     Dishes = new List<DishModel> { dishModel }
 
@@ -212,7 +271,7 @@ namespace PizzaWebshopCore2.Controllers
             }
             else
             {
-                cart = JsonConvert.DeserializeObject<Cart>(cartSession);
+                cart = JsonConvert.DeserializeObject<CartModel>(cartSession);
                 cart.Dishes.Add(dishModel);
 
                 var serializedCart = JsonConvert.SerializeObject(cart);

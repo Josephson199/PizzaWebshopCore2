@@ -26,7 +26,21 @@ namespace PizzaWebshopCore2.Data
                 .HasOne(di => di.Ingredient)
                 .WithMany(i => i.DishIngredients)
                 .HasForeignKey(di => di.IngredientId);
-            
+
+            builder.Entity<DishOrder>()
+                .HasKey(di => new {di.DishId, di.OrderId});
+
+            builder.Entity<DishOrder>()
+                .HasOne(di => di.Dish)
+                .WithMany(d => d.DishOrders)
+                .HasForeignKey(di => di.DishId);
+
+            builder.Entity<DishOrder>()
+                .HasOne(di => di.Order)
+                .WithMany(i => i.DishOrders)
+                .HasForeignKey(di => di.OrderId);
+
+
 
             base.OnModelCreating(builder);
             // Customize the ASP.NET Identity model and override the defaults if needed.
@@ -37,5 +51,7 @@ namespace PizzaWebshopCore2.Data
         public DbSet<Dish> Dishes { get; set; }
         public DbSet<Ingredient> Ingredients { get; set; }
         public DbSet<DishIngredient> DishIngredients { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<DishOrder> DishOrders { get; set; }
     }
 }
