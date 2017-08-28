@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@using PizzaWebshopCore2.Models
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -14,11 +18,17 @@
             <a href="#" data-activates="mobile-demo" class="button-collapse"><i style="color: black;" class="material-icons">menu</i></a>
             <ul class="right hide-on-med-and-down">
                 <li><a asp-controller="Dishes" asp-action="Index">Foods</a></li>
-                <li><a asp-controller="Dishes" asp-action="Checkout">Checkout</a></li>
+                @if (!SignInManager.IsSignedIn(User))
+                {
+                    <li><a asp-controller="Account" asp-action="Login">Login</a></li>
+                }
+                
+                <li><a asp-controller="Account" asp-action="Register">Register</a></li>
+                
             </ul>
             <ul class="side-nav" id="mobile-demo">
                 <li><a asp-controller="Dishes" asp-action="Index">Foods</a></li>
-                <li><a asp-controller="Dishes" asp-action="Checkout">Checkout</a></li>
+                <li><a asp-controller="Account" asp-action="Login">Login</a></li>
             </ul>
         </div>
     </nav>

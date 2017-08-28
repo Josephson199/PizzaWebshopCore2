@@ -28,22 +28,7 @@
 
                             }
                         </div>
-                            @*@foreach (var ingredient in dish.Ingredients)
-            {
-                <span>@ingredient.Name</span>
-
-            }
-            <br/>
-            <span>Extra:</span>
-            <div id="@dish.Id-extra">
-            @foreach (var ingredient in Model.Ingredients)
-            {
-                <p style="display: inline;">
-                    <input value="@ingredient.Id" class="filled-in ingredient-checkbox" type="checkbox" id="@ingredient.Id-extra-ingredient"/>
-                    <label for="@ingredient.Id-extra-ingredient">@ingredient.Name</label>
-                </p>
-            }
-            </div>*@
+                  
                         </div>
                     <div class="card-action">
                         <button value="@dish.Id" name="@dish.Name" class="waves-effect waves-light btn addToCart"><i class="material-icons left">add</i>Add</button>

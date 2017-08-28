@@ -19,7 +19,6 @@ namespace PizzaWebshopCore2.Controllers
 
         public DishesController(ApplicationDbContext context)
         {
-           
             _context = context;
         }
 
