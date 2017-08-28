@@ -36,6 +36,7 @@ namespace PizzaWebshopCore2.Controllers
                 Price = d.Price,
                 Ingredients = d.DishIngredients.Select(di => new IngredientModel
                 {
+                    Id = di.Ingredient.Id,
                     Name = di.Ingredient.Name,
                     Price = di.Ingredient.Price
 
@@ -63,30 +64,44 @@ namespace PizzaWebshopCore2.Controllers
 
         [HttpPost]
         [Route("add-dish-to-session")]
-        public JsonResult AddDishToSession([FromBody] int id)
+        public JsonResult AddDishToSession([FromBody] DishJsonDto dishJsonDto)
         {
             var dishModel = _context.Dishes
                 .Select(d => new DishModel
-            {
-                Id = d.Id,
-                Name = d.Name,
-                Price = d.Price,
-                Ingredients = d.DishIngredients.Select(di => new IngredientModel
                 {
-                    Id = di.Ingredient.Id,
-                    Name = di.Ingredient.Name,
-                    Price = di.Ingredient.Price
-                }).ToList()
-            })
-            .FirstOrDefault(d => d.Id == id);
+                    Id = d.Id,
+                    Name = d.Name,
+                    Price = d.Price,
+                    Ingredients = _context.Ingredients.Where(i => dishJsonDto.IngredientIds.Contains(i.Id))
+                    .Select(i => new IngredientModel
+                        {
+                            Id = i.Id,
+                            Name = i.Name,
+                            Price = i.Price
+                        })
+                    .ToList()
+                })
+            .FirstOrDefault(d => d.Id == dishJsonDto.DishId);
 
             if (dishModel == null)
             {
                 return Json("fail");
             }
-            
+
+            //if (dishJsonDto.IngredientIds.Any())
+            //{
+            //    var extraIngredients = _context.Ingredients.Where(i => dishJsonDto.IngredientIds.Contains(i.Id))
+            //        .Select(i => new IngredientModel
+            //        {
+            //            Id = i.Id,
+            //            Name = i.Name,
+            //            Price = i.Price
+            //        });
+            //    dishModel.Ingredients.AddRange(extraIngredients);
+            //}
+
             var cart = AddToSession(dishModel);
-            
+
             var jsonDishResult = new JsonDishResult
             {
                 Dish = dishModel,
@@ -209,27 +224,5 @@ namespace PizzaWebshopCore2.Controllers
             return cart;
         }
 
-        [Route("checkout")]
-        public IActionResult Checkout()
-        {
-            
-            var cartSession = HttpContext.Session.GetString(SessionKeyName);
-            Cart cart;
-
-            if (cartSession == null)
-            {
-                cart = new Cart();
-            }
-            else
-            {
-                cart = JsonConvert.DeserializeObject<Cart>(cartSession);
-            }
-
-            var model = new CheckoutViewModel
-            {
-                Cart = cart
-            };
-            return View(model);
-        }
     }
 }

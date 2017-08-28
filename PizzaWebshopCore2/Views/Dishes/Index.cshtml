@@ -1,4 +1,5 @@
-﻿@model PizzaWebshopCore2.Models.Dishes.IndexViewModel
+﻿@using System.Linq
+@model PizzaWebshopCore2.Models.Dishes.IndexViewModel
 <div class="container">
     <div class="row">
         <h1>Pizzas</h1>
@@ -10,11 +11,40 @@
                 <div style="opacity: 0.9" class="card blue-grey darken-1">
                     <div class="card-content white-text">
                         <span class="card-title">@dish.Name</span>
-                        @foreach (var ingredient in dish.Ingredients)
-                        {
-                            <span>@ingredient.Name</span>
-                        }
-                    </div>
+                        <div id="@dish.Id-ingredients">
+                            @foreach (var ingredient in Model.Ingredients)
+                            {
+                                <p style="display: inline;">
+                                    @if (dish.Ingredients.Any(i => i.Id == ingredient.Id))
+                                    {
+                                        <input value="@ingredient.Id" class="filled-in ingredient-checkbox" type="checkbox" checked="checked" id="@ingredient.Id-@dish.Id" />
+                                    }
+                                    else
+                                    {
+                                        <input value="@ingredient.Id" class="filled-in ingredient-checkbox" type="checkbox" id="@ingredient.Id-@dish.Id" />
+                                    }
+                                    <label for="@ingredient.Id-@dish.Id">@ingredient.Name</label>
+                                </p>
+
+                            }
+                        </div>
+                            @*@foreach (var ingredient in dish.Ingredients)
+            {
+                <span>@ingredient.Name</span>
+
+            }
+            <br/>
+            <span>Extra:</span>
+            <div id="@dish.Id-extra">
+            @foreach (var ingredient in Model.Ingredients)
+            {
+                <p style="display: inline;">
+                    <input value="@ingredient.Id" class="filled-in ingredient-checkbox" type="checkbox" id="@ingredient.Id-extra-ingredient"/>
+                    <label for="@ingredient.Id-extra-ingredient">@ingredient.Name</label>
+                </p>
+            }
+            </div>*@
+                        </div>
                     <div class="card-action">
                         <button value="@dish.Id" name="@dish.Name" class="waves-effect waves-light btn addToCart"><i class="material-icons left">add</i>Add</button>
                         <span id="@dish.Name-price" class="right">@dish.Price sek</span>
@@ -29,9 +59,8 @@
                         @foreach (var ingredient in Model.Ingredients)
                         {
                             <p style="display: inline;">
-                                <input id="@ingredient.Name-price" hidden value="@ingredient.Price"/>
-                                <input value="@ingredient.Name" class="filled-in ingredient-checkbox" type="checkbox" id="@ingredient.Id"/>
-                                <label for="@ingredient.Id">@ingredient.Name</label>
+                                <input value="@ingredient.Id" class="filled-in ingredient-checkbox" type="checkbox" id="@ingredient.Id-custom-ingredient"/>
+                                <label for="@ingredient.Id-custom-ingredient">@ingredient.Name</label>
                             </p>
 
                         }
@@ -118,6 +147,10 @@
     .collection {
         border: 0;
     }
+    .ingred-name-italic {
+        font-style: italic;
+        font-size: 65% !important;
+    }
 </style>
 <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.2.1.min.js"></script>
 <script type="text/javascript">
@@ -159,18 +192,19 @@
             cartHandler.config.customDish.on('click', function() {
                 cartHandler.addCustomDishToSession();
             });
-            //cartHandler.config.btnCheckout.on('click',
-            //    function() {
-            //        //window.location.href = "/dishes/checkout/";
-            //        $('#checkout-modal').modal('open');
-            //    });
         },
         addDishToSession: function (el) {
-           
+            var ingredientIds = new Array();
+            $('#' + el.value +'-ingredients input:checked').each(function() {
+                ingredientIds.push(parseInt(this.value));
+            });
+            if (ingredientIds.length <= 0) {
+                return;
+            }
             $.ajax({
                 type: 'POST',
                 url: 'dishes/add-dish-to-session',
-                data: el.value,
+                data: JSON.stringify({ dishId: el.value, ingredientIds: ingredientIds}),
                 contentType: "application/json; charset=utf-8",
                 success: function (data) {
                     cartHandler.appendToCart(data.dish);
@@ -186,7 +220,7 @@
             }
             var ingredientIds = new Array();
             ingredients.forEach(function (i) {
-                ingredientIds.push(parseInt(i.id));
+                ingredientIds.push(parseInt(i.value));
                 
             });
             
@@ -202,40 +236,30 @@
             });
         },
         appendToCart: function (dish) {
-
-             if ($('#' + dish.id + '_dishId').length) {
-                cartHandler.updateDishCount(dish);
-                
-            } else {
-
-                var a = document.createElement('a');
+            var a = document.createElement('a');
             
-                a.setAttribute('id', dish.id + '_dishId');
-                a.classList.add('collection-item');
-                a.classList.add('added-dish');
+            a.setAttribute('id', dish.id + '_dishId');
+            a.classList.add('collection-item');
+            a.classList.add('added-dish');
 
-                var span = document.createElement('span');
-                span.classList.add('badge');
-                if (dish.name === "Custom") {
-                    var ingredrients = [];
-                    dish.ingredients.forEach(function(ingredient) {
-                        ingredrients.push(ingredient.name);
+            var span = document.createElement('span');
+            span.classList.add('badge'); 
+            span.classList.add('ingred-name-italic');
+               
+                var ingredrients = [];
+                dish.ingredients.forEach(function(ingredient) {
+                    ingredrients.push(ingredient.name);
+                });
+                span.appendChild(document.createTextNode(ingredrients.join()));
+              
+                
+            a.addEventListener('click',
+                    function () {
+                        cartHandler.removeItemFromCart(this);
                     });
-                    span.appendChild(document.createTextNode(ingredrients.join()));
-                } else {
-                    span.appendChild(document.createTextNode("1"));
-                }
-                
-                a.addEventListener('click',
-                     function () {
-                         cartHandler.removeItemFromCart(this);
-                     });
-                a.appendChild(span);
-                a.appendChild(document.createTextNode(dish.name));
-                cartHandler.config.cartContainer.append(a);
-            }
-          
-            
+            a.appendChild(span);
+            a.appendChild(document.createTextNode(dish.name));
+            cartHandler.config.cartContainer.append(a);
         },
         updateDishCount(dish) {
             var dishToUpdate = $('#' + dish.id + '_dishId');
@@ -258,14 +282,8 @@
 
             cartHandler.removeItemFromSession(dishIdPure);
 
-            var dishCount = $(el).children().first().text();
-
-            if ($(el).text().indexOf('Custom') !== -1 || dishCount <= 1) {
-                $(el).remove();
-            } else {
-                $(el).children().first().text(parseInt(dishCount) -1);
-            }
-
+            $(el).remove();
+          
             if (cartHandler.config.cart.children().length <= 0) {
                 cartHandler.config.btnCheckout.addClass('disabled');
             }
@@ -281,9 +299,6 @@
                     cartHandler.updateCartPrice(data.cartPrice);
                 }
             });
-        },
-        checkout: function() {
-            
         }
        
     }
