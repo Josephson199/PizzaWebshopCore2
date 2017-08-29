@@ -1,5 +1,4 @@
 ﻿@using System.Linq
-@using System.Runtime.InteropServices.ComTypes
 @using Microsoft.AspNetCore.Identity
 @using PizzaWebshopCore2.Models
 @model PizzaWebshopCore2.Models.Dishes.IndexViewModel
@@ -85,7 +84,7 @@
             @if (SignInManager.IsSignedIn(User))
             {
 
-                var user = UserManager.GetUserAsync(User).Result;
+                var user = await UserManager.GetUserAsync(User);
                 
 
                 <form id="authorized-submit-form" class="col s12">
@@ -118,7 +117,7 @@
             }
             else
             {
-                <form asp-action="SaveOrder" asp-controller="Dishes" asp-antiforgery="true" class="col s12">
+                <form id="unauthorized-sumbit-form" class="col s12">
                     <div class="row">
                         <div class="input-field col s6">
                             <input asp-for="PaymentInformationModel.FirstName" id="first_name" type="text" class="validate">
@@ -183,7 +182,7 @@
 </style>
 <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.2.1.min.js"></script>
 <script type="text/javascript">
-    
+
 
     cartHandler = {
         init: function() {
@@ -199,7 +198,7 @@
                     if (data.dishes) {
                         data.dishes.forEach(function(dish) {
                             cartHandler.appendToCart(dish);
-                        
+
                         });
                         cartHandler.updateCartPrice(data.cartPrice);
                     }
@@ -236,11 +235,12 @@
                 data: JSON.stringify({ dishId: el.value, ingredientIds: ingredientIds}),
                 contentType: "application/json; charset=utf-8",
                 success: function (data) {
-                    cartHandler.appendToCart(data.dish);
                     cartHandler.updateCartPrice(data.cartPrice);
+                    cartHandler.appendToCart(data.dish);
+                    
                 }
             });
-            
+
         },
         addCustomDishToSession: function () {
             var ingredients = document.querySelectorAll('#custom-dish input[type="checkbox"]:checked');
@@ -250,9 +250,9 @@
             var ingredientIds = new Array();
             ingredients.forEach(function (i) {
                 ingredientIds.push(parseInt(i.value));
-                
+
             });
-            
+
             $.ajax({
                 type: 'POST',
                 url: 'dishes/add-custom-dish-to-session',
@@ -272,16 +272,16 @@
             a.classList.add('added-dish');
 
             var span = document.createElement('span');
-            span.classList.add('badge'); 
+            span.classList.add('badge');
             span.classList.add('ingred-name-italic');
-               
+
             var ingredrients = [];
             dish.ingredients.forEach(function(ingredient) {
                 ingredrients.push(ingredient.name);
             });
             span.appendChild(document.createTextNode(ingredrients.join()));
-              
-                
+
+
             a.addEventListener('click',
                 function () {
                     cartHandler.removeItemFromCart(this);
@@ -292,7 +292,7 @@
         },
         updateDishCount(dish) {
             var dishToUpdate = $('#' + dish.id + '_dishId');
-            
+
             var currentCount = dishToUpdate.children().first().text();
             currentCount++;
             dishToUpdate.children().first().text(currentCount);
@@ -302,7 +302,7 @@
                 cartHandler.config.btnCheckout.removeClass('disabled');
             }
             cartHandler.config.totalPriceContainer.text(cartPrice);
-            
+
         },
         removeItemFromCart: function (el) {
             var dishId = $(el).attr('id');
@@ -312,13 +312,13 @@
             cartHandler.removeItemFromSession(dishIdPure);
 
             $(el).remove();
-          
+
             if (cartHandler.config.cart.children().length <= 0) {
                 cartHandler.config.btnCheckout.addClass('disabled');
             }
         },
         removeItemFromSession: function (dishId) {
-            
+            $('.added-dish').addClass('disabled');
             $.ajax({
                 type: 'POST',
                 url: 'dishes/remove-dish-from-cart-session',
@@ -326,12 +326,13 @@
                 contentType: "application/json; charset=utf-8",
                 success: function (data) {
                     cartHandler.updateCartPrice(data.cartPrice);
+                    $('.added-dish').removeClass('disabled');
                 }
             });
         }
-       
+
     }
-            
+
 
     $(document).ready(function() {
         cartHandler.init();
@@ -353,7 +354,30 @@
                 data: JSON.stringify(data),
                 contentType: "application/json; charset=utf-8",
                 success: function (data) {
-                  
+                    window.location.replace('/home/index?ordercomplete=true');
+                }
+           });
+        });
+
+        $('#unauthorized-submit-form').submit(function(evt) {
+            evt.preventDefault();
+            var data = {
+                firstName: $('#first_name'),
+                lastName: $('#last_name'),
+                email: $('#email'),
+                street: $('#street').val(),
+                city: $('#city').val(),
+                postalCode: $('#postal_code').val(),
+                cardNumber: $('#card_number').val()
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: 'dishes/save-order-unauthorized',
+                data: JSON.stringify(data),
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    window.location.replace('/home/index?ordercomplete=true');
                 }
             });
         });

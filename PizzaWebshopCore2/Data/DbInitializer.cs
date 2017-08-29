@@ -13,7 +13,12 @@ namespace PizzaWebshopCore2.Data
             var aUser = new ApplicationUser
             {
                 UserName = "student@test.com",
-                Email = "student@test.com"
+                Email = "student@test.com",
+                City = "stockholm",
+                FirstName  = "mattias",
+                LastName = "josephsson",
+                Street = "ribbings väg 7c",
+                PostalCode = "929292"
             };
             var userResult = userManager.CreateAsync(aUser, "Pa$$w0rd").Result;
 
@@ -23,7 +28,12 @@ namespace PizzaWebshopCore2.Data
             var adminUser = new ApplicationUser
             {
                 UserName = "admin@test.com",
-                Email = "admin@test.com"
+                Email = "admin@test.com",
+                City = "stockholm",
+                FirstName = "mattias",
+                LastName = "josephsson",
+                Street = "ribbings väg 7c",
+                PostalCode = "929292"
             };
             var adminUserResult = userManager.CreateAsync(adminUser, "Pa$$w0rd").Result;
 

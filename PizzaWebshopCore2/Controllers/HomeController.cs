@@ -7,9 +7,14 @@ namespace PizzaWebshopCore2.Controllers
     public class HomeController : Controller
     {
         
-        public IActionResult Index()
+        public IActionResult Index(bool orderComplete = false)
         {
             var viewModel = new IndexViewModel();
+            if (orderComplete)
+            {
+                viewModel.CompletedOrder = true;
+            }
+            
             return View(viewModel);
         }
     }

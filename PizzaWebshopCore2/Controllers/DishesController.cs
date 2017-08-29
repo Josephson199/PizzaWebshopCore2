@@ -21,12 +21,14 @@ namespace PizzaWebshopCore2.Controllers
         private const string SessionKeyName = "_Cart";
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
         
 
-        public DishesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public DishesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
         {
             _context = context;
             _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         public IActionResult Index()
@@ -187,20 +189,65 @@ namespace PizzaWebshopCore2.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        [Route("save-order")]
-        public async Task<IActionResult> SaveOrder([FromBody] PaymentInformationModel paymentInformationModel)
+        [Route("save-order-unauthorized")]
+        public async Task<IActionResult> SaveOrderUnauthorized([FromBody] PaymentInformationModel paymentInformationModel)
         {
-         
-            //save order
+            var cartSession = HttpContext.Session.GetString(SessionKeyName);
+
+            if (cartSession == null)
+            {
+                return Json("fail");
+            }
+
+            var aUser = new ApplicationUser
+            {
+                UserName = paymentInformationModel.Email,
+                Email = paymentInformationModel.Email,
+                FirstName = paymentInformationModel.FirstName,
+                LastName = paymentInformationModel.LastName,
+                City = paymentInformationModel.City,
+                Street = paymentInformationModel.Street,
+                PostalCode = paymentInformationModel.PostalCode
+            };
+
+            var userResult = await _userManager.CreateAsync(aUser, "Pa$$w0rd");
+
+            if (!userResult.Succeeded)
+            {
+                return Json("fail");
+            }
+            
+            var result = await _signInManager.PasswordSignInAsync(aUser.Email, "Pa$$w0rd", true, false);
+
+            if (!result.Succeeded)
+            {
+                return Json("fail");
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null)
+            {
+                return Json("fail");
+            }
+            
+            var cart = JsonConvert.DeserializeObject<CartModel>(cartSession);
+
+            var order = CreateOrder(cart, user);
+
+            _context.Add(order);
+            _context.SaveChanges();
+
             //email?
+         
             HttpContext.Session.Clear();
-            return RedirectToAction(nameof(HomeController.Index), "Home");
+            return Json("orderComplete");
         }
 
         [HttpPost]
         [Authorize]
         [Route("save-order-authorized")]
-        public async Task<IActionResult> SaveOrderAuthorized([FromBody] PaymentInformationModel paymentInformationModel)
+        public async Task<JsonResult> SaveOrderAuthorized([FromBody] PaymentInformationModel paymentInformationModel)
         {
             //get user
             var user = await _userManager.GetUserAsync(User);
@@ -213,6 +260,18 @@ namespace PizzaWebshopCore2.Controllers
 
             var cart = JsonConvert.DeserializeObject<CartModel>(cartSession);
 
+            var order = CreateOrder(cart, user);
+
+            _context.Add(order);
+            _context.SaveChanges();
+
+            //email?
+            HttpContext.Session.Clear();
+            return Json("orderComplete");
+        }
+
+        private Order CreateOrder(CartModel cart, ApplicationUser user)
+        {
             var order = new Order
             {
                 ApplicationUser = user,
@@ -226,26 +285,15 @@ namespace PizzaWebshopCore2.Controllers
                 Order = order,
                 OrderedDishesIngredients = d.Ingredients.Select(i => new OrderedDishIngredient
                 {
-                    Ingredient = new Ingredient
-                    {
-                        Id = i.Id,
-                        Name = i.Name,
-                        Price = i.Price
-                    }
+                    Ingredient = _context.Ingredients.FirstOrDefault(ie => ie.Id == i.Id)
                 }).ToList()
 
             });
 
             order.OrderedDishes = orderedDishes.ToList();
 
-            _context.Add(order);
-            _context.SaveChanges();
-
-            //email?
-            HttpContext.Session.Clear();
-            return RedirectToAction(nameof(HomeController.Index), "Home");
+            return order;
         }
-
 
 
         private CartModel AddToSession(DishModel dishModel)

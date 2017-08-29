@@ -1,14 +1,32 @@
 ﻿@model PizzaWebshopCore2.Models.Home.IndexViewModel
-
-<header id="showcase">
-    <div class="row">
-        <div class="col s12 m8 l6 offset-l3">
-            <h1 id="h1-welcome">Welcome to pizza place</h1>
-            <p id="p-welcome">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin vel nulla mattis, scelerisque ante a, lacinia quam. Etiam faucibus nisi sed ante congue</p>
+    
+@if (Model.CompletedOrder)
+{
+    <header id="showcase">
+        <div class="row">
+            <div class="col s12 m8 l6 offset-l3">
+                <h1 id="h1-welcome">Thank you for using Veravoni Pizza!</h1>
+                <p id="p-welcome">We have emailed you a confirmation of your order. Welcome back!</p>
+            </div>
         </div>
-    </div>
-    <a asp-action="Index" asp-controller="Dishes" class="waves-effect waves-light btn-large blue-grey darken-4 waves-effect waves-teal"><i class="material-icons right">subdirectory_arrow_right</i>Continue</a>
-</header>
+        <a asp-action="Index" asp-controller="Dishes" class="waves-effect waves-light btn-large blue-grey darken-4 waves-effect waves-teal"><i class="material-icons right">subdirectory_arrow_right</i>Continue</a>
+    </header>
+
+}
+else
+{
+    <header id="showcase">
+        <div class="row">
+            <div class="col s12 m8 l6 offset-l3">
+                <h1 id="h1-welcome">Welcome to Veravoni Pizza!</h1>
+                <p id="p-welcome">We are the most trusted and used pizza place in the world. Please continue to browse our famous New York style pizzas. And remember, tell your friends!</p>
+            </div>
+        </div>
+        <a asp-action="Index" asp-controller="Dishes" class="waves-effect waves-light btn-large blue-grey darken-4 waves-effect waves-teal"><i class="material-icons right">subdirectory_arrow_right</i>Continue</a>
+    </header>
+
+}
+
 
 
 <style>
