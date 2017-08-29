@@ -84,9 +84,10 @@
         <div class="row">
             @if (SignInManager.IsSignedIn(User))
             {
+
+                var user = UserManager.GetUserAsync(User).Result;
                 
-                    ApplicationUser user = UserManager.GetUserAsync(User).Result;
-                
+
                 <form id="authorized-submit-form" class="col s12">
                     <div class="row">
                         <div class="input-field col s12">

@@ -186,6 +186,7 @@ namespace PizzaWebshopCore2.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         [Route("save-order")]
         public async Task<IActionResult> SaveOrder([FromBody] PaymentInformationModel paymentInformationModel)
         {
@@ -197,6 +198,7 @@ namespace PizzaWebshopCore2.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [Route("save-order-authorized")]
         public async Task<IActionResult> SaveOrderAuthorized([FromBody] PaymentInformationModel paymentInformationModel)
         {
@@ -211,38 +213,34 @@ namespace PizzaWebshopCore2.Controllers
 
             var cart = JsonConvert.DeserializeObject<CartModel>(cartSession);
 
-            var order = new Order();
+            var order = new Order
+            {
+                ApplicationUser = user,
+                Price = cart.CartPrice
+            };
 
-            var dishes = cart.Dishes.Select(d => new Dish
+            var orderedDishes = cart.Dishes.Select(d => new OrderedDish
             {
                 Name = d.Name,
-                Id = d.Id,
-                Price = d.Price
+                Price = d.Price,
+                Order = order,
+                OrderedDishesIngredients = d.Ingredients.Select(i => new OrderedDishIngredient
+                {
+                    Ingredient = new Ingredient
+                    {
+                        Id = i.Id,
+                        Name = i.Name,
+                        Price = i.Price
+                    }
+                }).ToList()
+
             });
 
-            foreach (var dish in cart.Dishes)
-            {
-                var ingredients = dish.Ingredients.Select(i => new Ingredient
-                {
-                    Name = i.Name,
-                    Id = i.Id,
-                    Price = i.Price
-                });
+            order.OrderedDishes = orderedDishes.ToList();
 
-            }
-            
+            _context.Add(order);
+            _context.SaveChanges();
 
-
-
-            order.ApplicationUser = user;
-            
-
-
-            
-
-            
-
-            //save order
             //email?
             HttpContext.Session.Clear();
             return RedirectToAction(nameof(HomeController.Index), "Home");
