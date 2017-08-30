@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PizzaWebshopCore2.Data;
+using PizzaWebshopCore2.Models.Entities;
 using PizzaWebshopCore2.Models.Manage;
 
 namespace PizzaWebshopCore2.Controllers
@@ -71,18 +72,49 @@ namespace PizzaWebshopCore2.Controllers
         [HttpPost]
         public async Task<IActionResult> EditDish(EditViewModel editModel)
         {
-            var dish = await _context.Dishes.SingleOrDefaultAsync(m => m.Id == editModel.Dish.Id);
+            var dish = await _context.Dishes.Include(d => d.DishIngredients).SingleOrDefaultAsync(m => m.Id == editModel.Dish.Id);
+
             if (dish == null)
             {
                 return NotFound();
             }
 
+            dish.Name = editModel.Dish.Name;
+            dish.Price = editModel.Dish.Price;
+            var ingredIdsToKeep = dish.DishIngredients.Select(di => di.IngredientId);
+
+            var selectedIngredientIds = editModel.CheckBoxIngredient.Where(ch => ch.IsChecked).Select(ch => ch.Id).Except(ingredIdsToKeep);
+
+            var ingredientsToRemove = _context.Ingredients.Where(i => !selectedIngredientIds.Contains(i.Id) && dish.DishIngredients.Any(di => di.IngredientId == i.Id));
+           
+            var ingredientsToAdd = _context.Ingredients.Where(i => selectedIngredientIds.Contains(i.Id));
+
+            foreach (var ingredient in ingredientsToRemove)
+            {
+                var dishIngredientToRemove =
+                    dish.DishIngredients.FirstOrDefault(di => di.IngredientId == ingredient.Id);
+                dish.DishIngredients.Remove(dishIngredientToRemove);
+            }
+
+            await _context.SaveChangesAsync();
+
+            foreach (var ingredient in ingredientsToAdd)
+            {
+                dish.DishIngredients.Add(new DishIngredient
+                {
+                    Dish = dish,
+                    Ingredient = ingredient
+                });
+            }
+
+            await _context.SaveChangesAsync();
+            
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(dish);
-                    await _context.SaveChangesAsync();
+                    
+                   
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -99,7 +131,12 @@ namespace PizzaWebshopCore2.Controllers
             }
             var model = new EditViewModel
             {
-                Dish = dish
+                Dish = dish,
+                CheckBoxIngredient = _context.Ingredients.Select(i => new CheckBoxItem
+                {
+                Id = i.Id,
+                Name = i.Name
+            }).ToList()
             };
 
             return View("Edit", model);
