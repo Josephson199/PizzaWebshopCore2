@@ -1,0 +1,50 @@
+﻿@model PizzaWebshopCore2.Models.Manage.IndexViewModel
+
+<div class="container">
+    <div class="row">
+        <h2>Manage</h2>   
+        <div style="opacity: 0.9;" class="col s12 m8 l8 blue-grey darken-1">
+            
+            <table>
+                <thead>
+                <tr>
+                    <th>Dish</th>
+                    <th>Ingredients</th>
+                    <th>Price</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+                </thead>
+
+                <tbody>
+                @foreach (var dish in Model.Dishes)
+                {
+                    <tr>
+                        <td>@dish.Name</td>
+                        <td>
+                            @foreach (var ingredient in dish.DishIngredients)
+                            {
+                                <span>@ingredient.Ingredient.Name</span>
+                            }
+                        </td>
+                        <td>@dish.Price</td>
+                        <td>
+                            <a class="waves-effect waves-light btn" asp-action="Edit" asp-controller="Manage" asp-route-id="@dish.Id">Edit</a>
+                        </td>
+                        <td>
+                            <form asp-action="Delete" asp-controller="Manage">
+                                <input name="id" hidden value="@dish.Id"/>
+                                <button class="waves-effect waves-light btn red darken-1" type="submit">Delete</button>
+                            </form>
+                        </td>
+                    </tr>     
+                }
+               
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+

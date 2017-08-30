@@ -130,7 +130,7 @@
                     </div>
                     <div class="row">
                         <div class="input-field col s12">
-                            <input asp-for="PaymentInformationModel.Email" id="email" type="text" class="validate">
+                            <input asp-for="PaymentInformationModel.Email" id="email" type="email" class="validate">
                             <label for="email">Email</label>
                         </div>
                     </div>
@@ -180,7 +180,7 @@
         font-size: 65% !important;
     }
 </style>
-<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.2.1.min.js"></script>
+
 <script type="text/javascript">
 
 
@@ -359,12 +359,12 @@
            });
         });
 
-        $('#unauthorized-submit-form').submit(function(evt) {
+        $('#unauthorized-sumbit-form').submit(function(evt) {
             evt.preventDefault();
             var data = {
-                firstName: $('#first_name'),
-                lastName: $('#last_name'),
-                email: $('#email'),
+                firstName: $('#first_name').val(),
+                lastName: $('#last_name').val(),
+                email: $('#email').val(),
                 street: $('#street').val(),
                 city: $('#city').val(),
                 postalCode: $('#postal_code').val(),

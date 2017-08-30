@@ -223,17 +223,12 @@ namespace PizzaWebshopCore2.Controllers
             {
                 return Json("fail");
             }
-
-            var user = await _userManager.GetUserAsync(User);
-
-            if (user == null)
-            {
-                return Json("fail");
-            }
+           
+            await _signInManager.SignInAsync(aUser, isPersistent: true);
             
             var cart = JsonConvert.DeserializeObject<CartModel>(cartSession);
 
-            var order = CreateOrder(cart, user);
+            var order = CreateOrder(cart, aUser);
 
             _context.Add(order);
             _context.SaveChanges();
@@ -249,7 +244,6 @@ namespace PizzaWebshopCore2.Controllers
         [Route("save-order-authorized")]
         public async Task<JsonResult> SaveOrderAuthorized([FromBody] PaymentInformationModel paymentInformationModel)
         {
-            //get user
             var user = await _userManager.GetUserAsync(User);
             var cartSession = HttpContext.Session.GetString(SessionKeyName);
 

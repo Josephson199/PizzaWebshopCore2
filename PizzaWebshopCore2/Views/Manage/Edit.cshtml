@@ -1,0 +1,50 @@
+﻿@using System.Linq
+@model PizzaWebshopCore2.Models.Manage.EditViewModel
+
+<div class="container">
+    <div class="row">
+        <div style="opacity: 0.9;" class="col s12 m8 l8 blue-grey darken-1">
+            <h2>Edit</h2>
+            <div class="row">
+                <form asp-action="EditDish" asp-controller="Manage" class="col s12">
+                    <input hidden asp-for="@Model.Dish.Id" value="@Model.Dish.Id"/>
+                    <div class="row">
+                        <div class="input-field col s6">
+                            <input asp-for="@Model.Dish.Name" id="name" type="text" class="validate" value="@Model.Dish.Name">
+                            <label for="name">Name</label>
+                        </div>
+                        <div class="input-field col s6">
+                            <input asp-for="@Model.Dish.Price" id="price" type="number" class="validate" value="@Model.Dish.Price">
+                            <label for="price">Price</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div style="margin-left: 10px;">
+                            
+                            @for (int i = 0; i < Model.CheckBoxIngredient.Count; i++)
+                            {
+                                @Html.HiddenFor(x => Model.CheckBoxIngredient[i].Id, null)
+                                @Html.HiddenFor(y => Model.CheckBoxIngredient[i].Name, null)
+                                <p style="display: inline;">
+                                    @if (Model.Dish.DishIngredients.Any(ing => ing.IngredientId == Model.CheckBoxIngredient[i].Id))
+                                    {
+                                        <input asp-for="@Model.CheckBoxIngredient[i].IsChecked" class="filled-in" type="checkbox" checked="checked" id="@Model.CheckBoxIngredient[i].Id-ingredient"/>
+                                    }
+                                    else
+                                    {
+                                        <input asp-for="@Model.CheckBoxIngredient[i].IsChecked" class="filled-in" type="checkbox" id="@Model.CheckBoxIngredient[i].Id-ingredient"/>
+                                    }
+                                    <label for="@Model.CheckBoxIngredient[i].Id-ingredient">@Model.CheckBoxIngredient[i].Name</label>
+                                </p>
+                            }
+                            
+
+                        </div>
+                    </div>
+                   
+                    <button type="submit" class="waves-effect waves-light btn">Update</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
