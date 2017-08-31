@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -81,66 +79,29 @@ namespace PizzaWebshopCore2.Controllers
 
             dish.Name = editModel.Dish.Name;
             dish.Price = editModel.Dish.Price;
-            var ingredIdsToKeep = dish.DishIngredients.Select(di => di.IngredientId);
 
-            var selectedIngredientIds = editModel.CheckBoxIngredient.Where(ch => ch.IsChecked).Select(ch => ch.Id).Except(ingredIdsToKeep);
-
-            var ingredientsToRemove = _context.Ingredients.Where(i => !selectedIngredientIds.Contains(i.Id) && dish.DishIngredients.Any(di => di.IngredientId == i.Id));
-           
-            var ingredientsToAdd = _context.Ingredients.Where(i => selectedIngredientIds.Contains(i.Id));
-
-            foreach (var ingredient in ingredientsToRemove)
+            foreach (var dishDishIngredient in dish.DishIngredients)
             {
-                var dishIngredientToRemove =
-                    dish.DishIngredients.FirstOrDefault(di => di.IngredientId == ingredient.Id);
-                dish.DishIngredients.Remove(dishIngredientToRemove);
+                 _context.Remove(dishDishIngredient);
             }
 
             await _context.SaveChangesAsync();
 
-            foreach (var ingredient in ingredientsToAdd)
+            foreach (var chIngredientId in editModel.CheckBoxIngredient.Where(ch => ch.IsChecked).Select(ch => ch.Id))
             {
-                dish.DishIngredients.Add(new DishIngredient
+                var dishIngredient = new DishIngredient
                 {
                     Dish = dish,
-                    Ingredient = ingredient
-                });
+                    Ingredient = _context.Ingredients.Find(chIngredientId)
+                };
+
+                _context.Add(dishIngredient);
             }
 
             await _context.SaveChangesAsync();
             
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    
-                   
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (_context.Dishes.Any(e => e.Id == editModel.Dish.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            var model = new EditViewModel
-            {
-                Dish = dish,
-                CheckBoxIngredient = _context.Ingredients.Select(i => new CheckBoxItem
-                {
-                Id = i.Id,
-                Name = i.Name
-            }).ToList()
-            };
-
-            return View("Edit", model);
-
+            return RedirectToAction(nameof(Index));
+          
         }
     }
 }
