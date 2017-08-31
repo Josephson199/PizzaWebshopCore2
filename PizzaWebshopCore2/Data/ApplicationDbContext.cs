@@ -58,6 +58,8 @@ namespace PizzaWebshopCore2.Data
         public DbSet<OrderedDishIngredient> OrderedDishIngredients { get; set; }
 
         public DbSet<Order> Orders { get; set; }
+
+        public DbSet<Category> Categories { get; set; }
         
     }
 }

@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using PizzaWebshopCore2.Models.Entities;
 
 namespace PizzaWebshopCore2.Models.Manage
@@ -10,11 +8,7 @@ namespace PizzaWebshopCore2.Models.Manage
     {
         public Dish Dish { get; set; }
         public List<CheckBoxItem> CheckBoxIngredient { get; set; }
-    }
-    public class CheckBoxItem
-    {
-        public bool IsChecked { get; set; }
-        public int Id { get; set; }
-        public string Name { get; set; }
+        public int CategoryId { get; set; }
+        public SelectList Categories { get; set; }
     }
 }

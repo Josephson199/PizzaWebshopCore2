@@ -41,13 +41,16 @@ namespace PizzaWebshopCore2.Data
 
             if (!context.Dishes.Any())
             {
+                var newYorkStyledPizza = new Category {Name = "New York styled pizza"};
+                var italianStyledPizza = new Category {Name = "Italian styled pizza"};
+
                 var cheese = new Ingredient { Name = "Cheese", Price = 25};
                 var tomato = new Ingredient { Name = "Tomato", Price = 30};
                 var ham = new Ingredient { Name = "Ham", Price = 25};
 
-                var capricciosa = new Dish { Name = "Capricciosa", Price = 80 };
-                var margarita = new Dish { Name = "Margarita", Price = 70 };
-                var hawaii = new Dish { Name = "Hawaii", Price = 100 };
+                var capricciosa = new Dish { Name = "Capricciosa", Price = 80, Category = newYorkStyledPizza};
+                var margarita = new Dish { Name = "Margarita", Price = 70, Category = newYorkStyledPizza };
+                var hawaii = new Dish { Name = "Hawaii", Price = 100, Category = italianStyledPizza };
 
                 var margaritaCheese = new DishIngredient { Dish = margarita, Ingredient = cheese };
                 var margaritaHam = new DishIngredient { Dish = margarita, Ingredient = ham };

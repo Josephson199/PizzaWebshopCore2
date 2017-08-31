@@ -41,10 +41,21 @@
 
                         </div>
                     </div>
-                   
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <select asp-for="@Model.CategoryId" asp-items="@Model.Categories"></select>
+                            <label>Category</label>
+                        </div>
+                    </div>
                     <button type="submit" class="waves-effect waves-light btn">Update</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+<script>
+    $(document).ready(function() {
+        $('select').material_select();
+    });
+</script>
+
