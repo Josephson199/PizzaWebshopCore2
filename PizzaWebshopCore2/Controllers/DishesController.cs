@@ -35,13 +35,15 @@ namespace PizzaWebshopCore2.Controllers
         {
             var dishes = _context.Dishes
                 .Include(d => d.DishIngredients)
-                .ThenInclude(di => di.Ingredient);
+                .ThenInclude(di => di.Ingredient)
+                .Include(d => d.Category);
 
             var dishesTransformed = dishes.Select(d => new DishModel
             {
                 Id = d.Id,
                 Name = d.Name,
                 Price = d.Price,
+                Category = new CategoryModel{ Name = d.Category.Name },
                 Ingredients = d.DishIngredients.Select(di => new IngredientModel
                 {
                     Id = di.Ingredient.Id,

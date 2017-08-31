@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -143,6 +142,23 @@ namespace PizzaWebshopCore2.Controllers
 
             await _context.SaveChangesAsync();
             
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [Route("create-ingredient")]
+        [HttpPost]
+        public async Task<IActionResult> CreateIngredient(IndexViewModel model)
+        {
+            var ingredient = new Ingredient
+            {
+                Name = model.CreateIngredientModel.Name,
+                Price = model.CreateIngredientModel.Price
+            };
+
+            await _context.AddAsync(ingredient);
+
+            await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
 

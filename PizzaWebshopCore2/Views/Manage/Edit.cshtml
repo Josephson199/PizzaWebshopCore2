@@ -3,8 +3,9 @@
 
 <div class="container">
     <div class="row">
+        <h2>Edit Dish</h2>
         <div style="opacity: 0.9;" class="col s12 m8 l8 blue-grey darken-1">
-            <h2>Edit</h2>
+
             <div class="row">
                 <form asp-action="EditDish" asp-controller="Manage" class="col s12">
                     <input hidden asp-for="@Model.Dish.Id" value="@Model.Dish.Id"/>
@@ -20,7 +21,7 @@
                     </div>
                     <div class="row">
                         <div style="margin-left: 10px;">
-                            
+
                             @for (int i = 0; i < Model.CheckBoxIngredient.Count; i++)
                             {
                                 @Html.HiddenFor(x => Model.CheckBoxIngredient[i].Id, null)
@@ -37,7 +38,7 @@
                                     <label for="@Model.CheckBoxIngredient[i].Id-ingredient">@Model.CheckBoxIngredient[i].Name</label>
                                 </p>
                             }
-                            
+
 
                         </div>
                     </div>

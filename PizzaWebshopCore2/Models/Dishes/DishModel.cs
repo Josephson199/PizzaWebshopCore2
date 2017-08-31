@@ -9,6 +9,7 @@ namespace PizzaWebshopCore2.Models.Dishes
         public string Name { get; set; }
         public int Price { get; set; }
         public List<IngredientModel> Ingredients { get; set; }
+        public CategoryModel Category { get; set; }
 
         public int IngredientCosts
         {

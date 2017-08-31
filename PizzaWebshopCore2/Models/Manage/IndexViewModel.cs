@@ -9,6 +9,7 @@ namespace PizzaWebshopCore2.Models.Manage
     {
         public List<Dish> Dishes { get; set; }
         public CreateDishModel CreateDishModel { get; set; }
+        public CreateIngredientModel CreateIngredientModel { get; set; }
     }
 
     public class CreateDishModel
@@ -20,5 +21,13 @@ namespace PizzaWebshopCore2.Models.Manage
         public int CategoryId { get; set; }
         public SelectList Categories { get; set; }
         public List<CheckBoxItem> CheckBoxIngredient { get; set; }
+    }
+
+    public class CreateIngredientModel
+    {
+        [Required]
+        public string Name { get; set; }
+        [Required]
+        public int Price { get; set; }
     }
 }

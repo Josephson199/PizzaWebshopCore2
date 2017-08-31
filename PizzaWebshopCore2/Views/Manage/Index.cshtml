@@ -48,43 +48,57 @@
         </div>
         
         <div style="opacity: 0.9;" class="col s12 m5 l4 blue-grey">
-            
-                <form asp-action="CreateDish" asp-controller="Manage" class="col s12">
-                    <div class="row">
-                        <div class="input-field col s6">
-                            <input asp-for="@Model.CreateDishModel.Name" id="name" type="text" class="validate">
-                            <label for="name">Name</label>
-                        </div>
-                        <div class="input-field col s6">
-                            <input asp-for="@Model.CreateDishModel.Price" id="price" type="number" class="validate">
-                            <label for="price">Price</label>
-                        </div>
+            <h6>Create Dish</h6>
+            <form asp-action="CreateDish" asp-controller="Manage" class="col s12">
+                <div class="row">
+                    <div class="input-field col s6">
+                        <input asp-for="@Model.CreateDishModel.Name" id="name" type="text" class="validate">
+                        <label for="name">Name</label>
                     </div>
-                    <div class="row">
-                        <div style="margin-left: 10px;">
+                    <div class="input-field col s6">
+                        <input asp-for="@Model.CreateDishModel.Price" id="price" type="number" class="validate">
+                        <label for="price">Price</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div style="margin-left: 10px;">
                             
-                            @for (int i = 0; i < Model.CreateDishModel.CheckBoxIngredient.Count; i++)
-                            {
-                                @Html.HiddenFor(x => Model.CreateDishModel.CheckBoxIngredient[i].Id, null)
-                                @Html.HiddenFor(y => Model.CreateDishModel.CheckBoxIngredient[i].Name, null)
-                                <p style="display: inline;">
-                                    <input asp-for="@Model.CreateDishModel.CheckBoxIngredient[i].IsChecked" class="filled-in" type="checkbox" id="@Model.CreateDishModel.CheckBoxIngredient[i].Id-ingredient"/>
-                                    <label for="@Model.CreateDishModel.CheckBoxIngredient[i].Id-ingredient">@Model.CreateDishModel.CheckBoxIngredient[i].Name</label>
-                                </p>
-                            }
+                        @for (int i = 0; i < Model.CreateDishModel.CheckBoxIngredient.Count; i++)
+                        {
+                            @Html.HiddenFor(x => Model.CreateDishModel.CheckBoxIngredient[i].Id, null)
+                            @Html.HiddenFor(y => Model.CreateDishModel.CheckBoxIngredient[i].Name, null)
+                            <p style="display: inline;">
+                                <input asp-for="@Model.CreateDishModel.CheckBoxIngredient[i].IsChecked" class="filled-in" type="checkbox" id="@Model.CreateDishModel.CheckBoxIngredient[i].Id-ingredient"/>
+                                <label for="@Model.CreateDishModel.CheckBoxIngredient[i].Id-ingredient">@Model.CreateDishModel.CheckBoxIngredient[i].Name</label>
+                            </p>
+                        }
                             
 
-                        </div>
                     </div>
-                    <div class="row">
+                </div>
+                <div class="row">
                     <div class="input-field col s12">
                         <select asp-for="@Model.CreateDishModel.CategoryId" asp-items="@Model.CreateDishModel.Categories"></select>
                         <label>Category</label>
                     </div>
+                </div>
+                <button style="margin-bottom: 10px;" type="submit" class="waves-effect waves-light btn">Create</button>
+            </form>
+            <h6>Create Ingredient</h6>
+            <form asp-action="CreateIngredient" asp-controller="Manage" class="col s12">
+                <div class="row">
+                    <div class="input-field col s6">
+                        <input asp-for="@Model.CreateIngredientModel.Name" id="name" type="text" class="validate">
+                        <label for="name">Name</label>
                     </div>
-                    <button style="margin-bottom: 10px;" type="submit" class="waves-effect waves-light btn">Create</button>
-                </form>
-            </div>
+                    <div class="input-field col s6">
+                        <input asp-for="@Model.CreateIngredientModel.Price" id="price" type="number" class="validate">
+                        <label for="price">Price</label>
+                    </div>
+                </div>
+                <button style="margin-bottom: 10px;" type="submit" class="waves-effect waves-light btn">Create</button>
+            </form>
+        </div>
         </div>
     </div>
 
