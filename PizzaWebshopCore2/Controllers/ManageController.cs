@@ -163,5 +163,22 @@ namespace PizzaWebshopCore2.Controllers
             return RedirectToAction(nameof(Index));
 
         }
+
+        [Route("create-category")]
+        [HttpPost]
+        public async Task<IActionResult> CreateCategory(IndexViewModel model)
+        {
+            var category = new Category
+            {
+                Name = model.CreateCategoryModel.Name
+            };
+
+            await _context.AddAsync(category);
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+
+        }
     }
 }

@@ -88,12 +88,22 @@
             <form asp-action="CreateIngredient" asp-controller="Manage" class="col s12">
                 <div class="row">
                     <div class="input-field col s6">
-                        <input asp-for="@Model.CreateIngredientModel.Name" id="name" type="text" class="validate">
+                        <input asp-for="@Model.CreateIngredientModel.Name" id="name" type="text" class="validate" required>
                         <label for="name">Name</label>
                     </div>
                     <div class="input-field col s6">
-                        <input asp-for="@Model.CreateIngredientModel.Price" id="price" type="number" class="validate">
+                        <input asp-for="@Model.CreateIngredientModel.Price" id="price" type="number" class="validate" required>
                         <label for="price">Price</label>
+                    </div>
+                </div>
+                <button style="margin-bottom: 10px;" type="submit" class="waves-effect waves-light btn">Create</button>
+            </form>
+            <h6>Create Category</h6>
+            <form asp-action="CreateCategory" asp-controller="Manage" class="col s12">
+                <div class="row">
+                    <div class="input-field col s12">
+                        <input asp-for="@Model.CreateCategoryModel.Name" id="name" type="text" class="validate" required>
+                        <label for="name">Name</label>
                     </div>
                 </div>
                 <button style="margin-bottom: 10px;" type="submit" class="waves-effect waves-light btn">Create</button>

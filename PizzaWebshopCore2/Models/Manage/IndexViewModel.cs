@@ -10,6 +10,7 @@ namespace PizzaWebshopCore2.Models.Manage
         public List<Dish> Dishes { get; set; }
         public CreateDishModel CreateDishModel { get; set; }
         public CreateIngredientModel CreateIngredientModel { get; set; }
+        public CreateCategoryModel CreateCategoryModel { get; set; }
     }
 
     public class CreateDishModel
@@ -29,5 +30,10 @@ namespace PizzaWebshopCore2.Models.Manage
         public string Name { get; set; }
         [Required]
         public int Price { get; set; }
+    }
+    public class CreateCategoryModel
+    {
+        [Required]
+        public string Name { get; set; }
     }
 }

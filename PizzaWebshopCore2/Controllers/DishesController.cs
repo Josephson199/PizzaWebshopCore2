@@ -12,6 +12,7 @@ using PizzaWebshopCore2.Data;
 using PizzaWebshopCore2.Models;
 using PizzaWebshopCore2.Models.Dishes;
 using PizzaWebshopCore2.Models.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace PizzaWebshopCore2.Controllers
 {
@@ -22,13 +23,18 @@ namespace PizzaWebshopCore2.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly ILogger<DishesController> _logger;
         
 
-        public DishesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+        public DishesController(ApplicationDbContext context, 
+            UserManager<ApplicationUser> userManager, 
+            SignInManager<ApplicationUser> signInManager,
+            ILogger<DishesController> logger)
         {
             _context = context;
             _userManager = userManager;
             _signInManager = signInManager;
+            _logger = logger;
         }
 
         public IActionResult Index()
@@ -216,16 +222,12 @@ namespace PizzaWebshopCore2.Controllers
 
             if (!userResult.Succeeded)
             {
+                _logger.LogWarning($"Unable to create user {aUser.Email}");
                 return Json("fail");
             }
             
-            var result = await _signInManager.PasswordSignInAsync(aUser.Email, "Pa$$w0rd", true, false);
-
-            if (!result.Succeeded)
-            {
-                return Json("fail");
-            }
-           
+            _logger.LogInformation($"Created user {aUser.Email}");
+            
             await _signInManager.SignInAsync(aUser, isPersistent: true);
             
             var cart = JsonConvert.DeserializeObject<CartModel>(cartSession);
@@ -235,8 +237,10 @@ namespace PizzaWebshopCore2.Controllers
             _context.Add(order);
             _context.SaveChanges();
 
+            _logger.LogInformation($"Saved order to database. OrderId: {order.Id}");
+
             //email?
-         
+
             HttpContext.Session.Clear();
             return Json("orderComplete");
         }
