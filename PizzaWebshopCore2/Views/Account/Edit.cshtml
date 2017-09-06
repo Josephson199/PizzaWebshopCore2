@@ -1,0 +1,65 @@
+﻿@using System.Linq
+@model PizzaWebshopCore2.Models.Account.EditUserModel
+
+
+<div class="container">
+    <div class="row">
+            <form style="opacity: 0.9; margin-top: 100px;" class="col s12 m12 l6 offset-l3 blue-grey darken-1" >
+                <div class="row">
+                    <input hidden asp-for="@Model.User.Id"/>
+                    <div class="input-field col s6">
+                        <input asp-for="@Model.User.FirstName" id="first_name" type="text" class="validate">
+                        <label for="first_name">First Name</label>
+                    </div>
+                    <div class="input-field col s6">
+                        <input asp-for="@Model.User.LastName" id="last_name" type="text" class="validate">
+                        <label for="last_name">Last Name</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s12">
+                        <input asp-for="@Model.User.Email" id="email" type="email" class="validate">
+                        <label for="email">Email</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s12">
+                        <input asp-for="@Model.User.Street" id="street" type="text" class="validate">
+                        <label for="street">Street</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s6">
+                        <input asp-for="@Model.User.City" id="city" type="text" class="validate">
+                        <label for="city">City</label>
+                    </div>
+                    <div class="input-field col s6">
+                        <input asp-for="@Model.User.PostalCode" id="postal_code" type="text" class="validate">
+                        <label for="postal_code">Postal Code</label>
+                    </div>
+                </div>
+               
+                @foreach (var role in Model.Roles)
+                {
+                    <p style="display: inline;">
+                        @if (Model.User.Roles.Any(r => r == role.Name))
+                        {
+                            <input value="@role.Id" class="filled-in ingredient-checkbox" type="checkbox" checked="checked" id="@role.Id-role" />
+                        }
+                        else
+                        {
+                            <input value="@role.Id" class="filled-in ingredient-checkbox" type="checkbox" id="@role.Id-role" />
+                        }
+                        <label for="@role.Id-role">@role.Name</label>
+                    </p>
+
+
+                }
+                <br />
+                <br />
+                <button class="waves-effect waves-light btn" type="submit">Save</button>
+                <div asp-validation-summary="All" style="color: red; font-style: italic;" id="validation-errors"></div>
+            </form>
+   
+    </div>
+</div>

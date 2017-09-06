@@ -30,7 +30,8 @@
                 }
                 @if (User.IsInRole("Admin"))
                 {
-                    <li><a asp-controller="Manage" asp-action="Index">Manage</a></li>
+                    <li><a asp-controller="Manage" asp-action="Index">Manage Dishes</a></li>
+                    <li><a asp-controller="Account" asp-action="EditUsers">Manage Users</a></li>
                 }
 
                

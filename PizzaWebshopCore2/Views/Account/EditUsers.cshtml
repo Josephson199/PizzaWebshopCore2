@@ -1,0 +1,44 @@
+﻿
+@model PizzaWebshopCore2.Models.Account.EditUsersModel
+
+<div class="container">
+    <div class="row">
+        <h2>Manage Users</h2>
+        <div style="opacity: 0.9;" class="col s12 blue-grey darken-1">
+            <div class="row">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>First name</th>
+                        <th>Last name</th>
+                        <th>Street</th>
+                        <th>Postal Code</th>
+                        <th>City</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    
+                       @foreach (var user in Model.Users)
+                       {
+                           <tr>
+                               <td>@user.Email</td>
+                               <td>@user.FirstName</td>
+                               <td>@user.LastName</td>
+                               <td>@user.Street</td>
+                               <td>@user.PostalCode</td>
+                               <td>@user.City</td>
+                               <td><a asp-action="Edit" asp-controller="Account" asp-route-id="@user.Id"><i class="material-icons">edit</i></a></td>
+                           </tr>
+                       }
+                       
+                            
+                        
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
