@@ -3,7 +3,6 @@ using PizzaWebshopCore2.Models.Home;
 
 namespace PizzaWebshopCore2.Controllers
 {
-    
     public class HomeController : Controller
     {
         public IActionResult Index(bool orderComplete = false)

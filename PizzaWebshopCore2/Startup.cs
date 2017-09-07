@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PizzaWebshopCore2.Data;
 using PizzaWebshopCore2.Models;
+using PizzaWebshopCore2.Services;
 
 namespace PizzaWebshopCore2
 {
@@ -36,6 +37,7 @@ namespace PizzaWebshopCore2
 
             services.AddTransient<UserManager<ApplicationUser>>();
             services.AddTransient<RoleManager<IdentityRole>>();
+            services.AddTransient<TransformationService>();
             services.AddSession();
             services.AddMvc();
         }

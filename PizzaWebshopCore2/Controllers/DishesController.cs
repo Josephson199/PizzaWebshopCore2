@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using PizzaWebshopCore2.Data;
@@ -13,6 +15,7 @@ using PizzaWebshopCore2.Models;
 using PizzaWebshopCore2.Models.Dishes;
 using PizzaWebshopCore2.Models.Entities;
 using Microsoft.Extensions.Logging;
+using PizzaWebshopCore2.Services;
 
 namespace PizzaWebshopCore2.Controllers
 {
@@ -24,17 +27,20 @@ namespace PizzaWebshopCore2.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<DishesController> _logger;
+        private readonly TransformationService _tranformationService;
         
 
         public DishesController(ApplicationDbContext context, 
             UserManager<ApplicationUser> userManager, 
             SignInManager<ApplicationUser> signInManager,
-            ILogger<DishesController> logger)
+            ILogger<DishesController> logger,
+            TransformationService transformationService)
         {
             _context = context;
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
+            _tranformationService = transformationService;
         }
 
         public IActionResult Index()
@@ -44,21 +50,7 @@ namespace PizzaWebshopCore2.Controllers
                 .ThenInclude(di => di.Ingredient)
                 .Include(d => d.Category);
 
-            var dishesTransformed = dishes.Select(d => new DishModel
-            {
-                Id = d.Id,
-                Name = d.Name,
-                Price = d.Price,
-                Category = new CategoryModel{ Name = d.Category.Name },
-                Ingredients = d.DishIngredients.Select(di => new IngredientModel
-                {
-                    Id = di.Ingredient.Id,
-                    Name = di.Ingredient.Name,
-                    Price = di.Ingredient.Price
-
-                }).ToList()
-                
-            }).ToList();
+            var dishesTransformed = _tranformationService.TranformDishesToDishModels(dishes);
 
             var ingredients = _context.Ingredients.ToList();
 
@@ -75,7 +67,7 @@ namespace PizzaWebshopCore2.Controllers
                 Ingredients = ingredientsTransformed,
                 PaymentInformationModel = new PaymentInformationModel()
             };
-
+            
             return View(viewModel);
         }
 
