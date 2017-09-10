@@ -15,9 +15,9 @@ namespace PizzaWebshopCore2.Controllers
     public class ManageController : Controller
     {
 
-        private readonly ApplicationDbContext _context;
+        private readonly IApplicationDbContext _context;
 
-        public ManageController(ApplicationDbContext context)
+        public ManageController(IApplicationDbContext context)
         {
             _context = context;
         }

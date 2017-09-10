@@ -23,24 +23,27 @@ namespace PizzaWebshopCore2.Controllers
     public class DishesController : Controller
     {
         private const string SessionKeyName = "_Cart";
-        private readonly ApplicationDbContext _context;
+        private readonly IApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<DishesController> _logger;
         private readonly TransformationService _tranformationService;
         
+        
 
-        public DishesController(ApplicationDbContext context, 
+        public DishesController(IApplicationDbContext context, 
             UserManager<ApplicationUser> userManager, 
             SignInManager<ApplicationUser> signInManager,
             ILogger<DishesController> logger,
-            TransformationService transformationService)
+            TransformationService transformationService
+            )
         {
             _context = context;
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
             _tranformationService = transformationService;
+            
         }
 
         public IActionResult Index()
@@ -53,14 +56,14 @@ namespace PizzaWebshopCore2.Controllers
             var dishesTransformed = _tranformationService.TranformDishesToDishModels(dishes);
 
             var ingredients = _context.Ingredients.ToList();
-
+           
             var ingredientsTransformed = ingredients.Select(i => new IngredientModel
             {
                 Id = i.Id,
                 Name = i.Name,
                 Price = i.Price
             }).ToList();
-
+            
             var viewModel = new IndexViewModel
             {
                 Dishes = dishesTransformed,

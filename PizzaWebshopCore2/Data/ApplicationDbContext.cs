@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.CodeAnalysis.Semantics;
 using Microsoft.EntityFrameworkCore;
 using PizzaWebshopCore2.Models;
@@ -61,6 +62,9 @@ namespace PizzaWebshopCore2.Data
         public virtual DbSet<Order> Orders { get; set; }
 
         public virtual DbSet<Category> Categories { get; set; }
+
+        
+       
         
     }
 }

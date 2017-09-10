@@ -47,7 +47,7 @@ namespace PizzaWebshopCore2.Controllers
         {
             if (ModelState.IsValid)
             {
-                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, true, false);
+                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false);
                 if (result.Succeeded)
                 {
                     return RedirectToAction("Index", "Dishes");
@@ -96,7 +96,7 @@ namespace PizzaWebshopCore2.Controllers
                 var userResult = await _userManager.CreateAsync(newUser, model.Password);
                 if (userResult.Succeeded)
                 {
-                    await _signInManager.SignInAsync(newUser, isPersistent: true);
+                    await _signInManager.SignInAsync(newUser, isPersistent: false);
                     return RedirectToAction("Index", "Dishes");
 
                 }

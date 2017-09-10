@@ -84,35 +84,37 @@
         <div class="row">
             @if (SignInManager.IsSignedIn(User))
             {
-
+               
                 var user = await UserManager.GetUserAsync(User);
+               
+                    <form id="authorized-submit-form" class="col s12">
+                        <div class="row">
+                            <div class="input-field col s12">
+                                <input value="@user.Street" asp-for="PaymentInformationModel.Street" id="street" type="text" class="validate" required="required">
+                                <label for="street">Street</label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="input-field col s6">
+                                <input value="@user.City" asp-for="PaymentInformationModel.City" id="city" type="text" class="validate" required="required">
+                                <label for="city">City</label>
+                            </div>
+                            <div class="input-field col s6">
+                                <input value="@user.PostalCode" asp-for="PaymentInformationModel.PostalCode" id="postal_code" type="text" class="validate" required="required">
+                                <label for="postal_code">Postal Code</label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="input-field col s12">
+                                <input asp-for="PaymentInformationModel.CardNumber" id="card_number" type="text" class="validate" required="required">
+                                <label for="card_number">Card Number</label>
+                            </div>
+                        </div>
+                        <button id="submit-authorized-form" class="waves-effect waves-light btn" type="submit">Order</button>
+                    </form>
                 
 
-                <form id="authorized-submit-form" class="col s12">
-                    <div class="row">
-                        <div class="input-field col s12">
-                            <input value="@user.Street" asp-for="PaymentInformationModel.Street" id="street" type="text" class="validate" required="required">
-                            <label for="street">Street</label>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="input-field col s6">
-                            <input value="@user.City" asp-for="PaymentInformationModel.City" id="city" type="text" class="validate" required="required">
-                            <label for="city">City</label>
-                        </div>
-                        <div class="input-field col s6">
-                            <input value="@user.PostalCode" asp-for="PaymentInformationModel.PostalCode" id="postal_code" type="text" class="validate" required="required">
-                            <label for="postal_code">Postal Code</label>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="input-field col s12">
-                            <input asp-for="PaymentInformationModel.CardNumber" id="card_number" type="text" class="validate" required="required">
-                            <label for="card_number">Card Number</label>
-                        </div>
-                    </div>
-                    <button id="submit-authorized-form" class="waves-effect waves-light btn" type="submit">Order</button>
-                </form>
+              
                
                 
             }
