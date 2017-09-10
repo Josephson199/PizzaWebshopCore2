@@ -15,7 +15,7 @@ namespace PizzaWebshopCore2Tests
             var mockDbService = new Mock<IDatabaseService>();
 
             //act
-            var res = mockDbService.Object.Get<Dish>();
+            var res = mockDbService.Object.GetAll<Dish>();
 
             //assert
             Assert.IsType<EnumerableQuery<Dish>>(res);

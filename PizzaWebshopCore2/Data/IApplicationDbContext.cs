@@ -27,5 +27,6 @@ namespace PizzaWebshopCore2.Data
         Task<EntityEntry<TEntity>> AddAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = default(CancellationToken)) where TEntity : class;
        
         TEntity Find<TEntity>(params object[] keyValues) where TEntity : class;
+        Task<TEntity> FindAsync<TEntity>(params object[] keyValues) where TEntity : class;
     }
 }

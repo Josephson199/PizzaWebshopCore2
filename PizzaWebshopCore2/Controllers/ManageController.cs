@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using PizzaWebshopCore2.Data;
 using PizzaWebshopCore2.Models.Entities;
 using PizzaWebshopCore2.Models.Manage;
+using PizzaWebshopCore2.Services;
 
 namespace PizzaWebshopCore2.Controllers
 {
@@ -14,27 +14,26 @@ namespace PizzaWebshopCore2.Controllers
     [Authorize]
     public class ManageController : Controller
     {
+        private readonly IDatabaseService _databaseService;
 
-        private readonly IApplicationDbContext _context;
-
-        public ManageController(IApplicationDbContext context)
+        public ManageController(IDatabaseService databaseService)
         {
-            _context = context;
+            _databaseService = databaseService;
         }
 
         public IActionResult Index()
         {
             var model = new IndexViewModel
             {
-                Dishes = _context.Dishes.Include(d => d.DishIngredients).ThenInclude(di => di.Ingredient).Include(d => d.Category).ToList(),
+                Dishes = _databaseService.GetAll<Dish>().Include(d => d.DishIngredients).ThenInclude(di => di.Ingredient).Include(d => d.Category).ToList(),
                 CreateDishModel = new CreateDishModel
                 {
-                    CheckBoxIngredient = _context.Ingredients.Select(i => new CheckBoxItem
+                    CheckBoxIngredient = _databaseService.GetAll<Ingredient>().Select(i => new CheckBoxItem
                     {
                         Id = i.Id,
                         Name = i.Name
                     }).ToList(),
-                    Categories = new SelectList(_context.Categories.Select(x => new { Id = x.Id, Value = x.Name }), "Id", "Value")
+                    Categories = new SelectList(_databaseService.GetAll<Category>().Select(x => new { Id = x.Id, Value = x.Name }), "Id", "Value")
                 }
             };
 
@@ -45,20 +44,21 @@ namespace PizzaWebshopCore2.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
-            var dish = await _context.Dishes.SingleOrDefaultAsync(m => m.Id == id);
+            var dish = await _databaseService.GetAsync<Dish>(id);
             if (dish == null)
             {
                 return NotFound();      
             }
-            _context.Dishes.Remove(dish);
-            await _context.SaveChangesAsync();
+
+            _databaseService.Remove(dish);
+            await _databaseService.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         [Route("edit")]
         public async Task<IActionResult> Edit(int id)
         {
-            var dish = await _context.Dishes.Include(d => d.DishIngredients).ThenInclude(di => di.Ingredient).Include(d => d.Category).SingleOrDefaultAsync(m => m.Id == id);
+            var dish = await _databaseService.GetAll<Dish>().Include(d => d.DishIngredients).ThenInclude(di => di.Ingredient).Include(d => d.Category).SingleOrDefaultAsync(m => m.Id == id);
             if (dish == null)
             {
                 return NotFound();
@@ -66,12 +66,12 @@ namespace PizzaWebshopCore2.Controllers
             var model = new EditViewModel
             {
                 Dish = dish,
-                CheckBoxIngredient = _context.Ingredients.Select(i => new CheckBoxItem
+                CheckBoxIngredient = _databaseService.GetAll<Ingredient>().Select(i => new CheckBoxItem
                 {
                     Id = i.Id,
                     Name = i.Name
                 }).ToList(),
-                Categories = new SelectList(_context.Categories.Select(x => new { Id = x.Id, Value = x.Name }), "Id", "Value")
+                Categories = new SelectList(_databaseService.GetAll<Category>().Select(x => new { Id = x.Id, Value = x.Name }), "Id", "Value")
             };
 
             return View(model);
@@ -81,7 +81,7 @@ namespace PizzaWebshopCore2.Controllers
         [HttpPost]
         public async Task<IActionResult> EditDish(EditViewModel editModel)
         {
-            var dish = await _context.Dishes.Include(d => d.DishIngredients).SingleOrDefaultAsync(m => m.Id == editModel.Dish.Id);
+            var dish = await _databaseService.GetAll<Dish>().Include(d => d.DishIngredients).SingleOrDefaultAsync(m => m.Id == editModel.Dish.Id);
 
             if (dish == null)
             {
@@ -90,27 +90,27 @@ namespace PizzaWebshopCore2.Controllers
 
             dish.Name = editModel.Dish.Name;
             dish.Price = editModel.Dish.Price;
-            dish.Category = _context.Categories.Find(editModel.CategoryId);
+            dish.Category = await _databaseService.GetAsync<Category>(editModel.CategoryId);
 
-            foreach (var dishDishIngredient in dish.DishIngredients)
+            foreach (var dishIngredient in dish.DishIngredients)
             {
-                 _context.Remove(dishDishIngredient);
+                 _databaseService.Remove(dishIngredient);
             }
 
-            await _context.SaveChangesAsync();
+            await _databaseService.SaveChangesAsync();
 
             foreach (var chIngredientId in editModel.CheckBoxIngredient.Where(ch => ch.IsChecked).Select(ch => ch.Id))
             {
                 var dishIngredient = new DishIngredient
                 {
                     Dish = dish,
-                    Ingredient = _context.Ingredients.Find(chIngredientId)
+                    Ingredient = await _databaseService.GetAsync<Ingredient>(chIngredientId)
                 };
-
-                _context.Add(dishIngredient);
+                
+               _databaseService.Add(dishIngredient);
             }
 
-            await _context.SaveChangesAsync();
+            await _databaseService.SaveChangesAsync();
             
             return RedirectToAction(nameof(Index));
           
@@ -124,23 +124,25 @@ namespace PizzaWebshopCore2.Controllers
             {
                 Name = model.CreateDishModel.Name,
                 Price = model.CreateDishModel.Price,
-                Category = _context.Categories.Find(model.CreateDishModel.CategoryId)
+                Category = await _databaseService.GetAsync<Category>(model.CreateDishModel.CategoryId)
             };
+
+            
 
             var dishIngredients = model.CreateDishModel.CheckBoxIngredient.Where(cb => cb.IsChecked)
                 .Select(cb => cb.Id)
                 .Select(ingredientId => new DishIngredient
                 {
                     Dish = dish,
-                    Ingredient = _context.Ingredients.Find(ingredientId)
+                    Ingredient = _databaseService.Get<Ingredient>(ingredientId)
                 })
                 .ToList();
 
             dish.DishIngredients = dishIngredients;
 
-            await _context.AddAsync(dish);
+            await _databaseService.AddAsync(dish);
 
-            await _context.SaveChangesAsync();
+            await _databaseService.SaveChangesAsync();
             
 
             return RedirectToAction(nameof(Index));
@@ -156,9 +158,9 @@ namespace PizzaWebshopCore2.Controllers
                 Price = model.CreateIngredientModel.Price
             };
 
-            await _context.AddAsync(ingredient);
+            await _databaseService.AddAsync(ingredient);
 
-            await _context.SaveChangesAsync();
+            await _databaseService.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
 
@@ -173,9 +175,9 @@ namespace PizzaWebshopCore2.Controllers
                 Name = model.CreateCategoryModel.Name
             };
 
-            await _context.AddAsync(category);
+            await _databaseService.AddAsync(category);
 
-            await _context.SaveChangesAsync();
+            await _databaseService.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
 
