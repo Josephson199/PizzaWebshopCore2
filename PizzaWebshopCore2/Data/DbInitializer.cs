@@ -67,9 +67,6 @@ namespace PizzaWebshopCore2.Data
                 margarita.DishIngredients = new List<DishIngredient> { margaritaCheese, margaritaHam };
                 hawaii.DishIngredients = new List<DishIngredient> { hawaiiCheese };
 
-                context.AddRange(tomato, ham, cheese);
-
-                //context.DishIngredients.AddRange(margaritaCheese, hawaiiCheese, capricciosaCheese, capricciosaTomato, margaritaHam);
                 context.AddRange(capricciosa, margarita, hawaii);
                 context.SaveChanges();
             }

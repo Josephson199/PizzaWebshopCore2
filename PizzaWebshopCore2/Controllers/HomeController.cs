@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using PizzaWebshopCore2.Data;
 using PizzaWebshopCore2.Models.Home;
 
 namespace PizzaWebshopCore2.Controllers

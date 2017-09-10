@@ -38,6 +38,7 @@ namespace PizzaWebshopCore2
             services.AddTransient<UserManager<ApplicationUser>>();
             services.AddTransient<RoleManager<IdentityRole>>();
             services.AddTransient<TransformationService>();
+            services.AddScoped<IApplicationDbContext>(provider => provider.GetService<ApplicationDbContext>());
             services.AddSession();
             services.AddMvc();
         }

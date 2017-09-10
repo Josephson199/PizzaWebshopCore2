@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.CodeAnalysis.Semantics;
 using Microsoft.EntityFrameworkCore;
 using PizzaWebshopCore2.Models;
 using PizzaWebshopCore2.Models.Entities;
 
 namespace PizzaWebshopCore2.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplicationDbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -50,16 +51,16 @@ namespace PizzaWebshopCore2.Data
             // Add your customizations after calling base.OnModelCreating(builder);
         }
 
-        public DbSet<Dish> Dishes { get; set; }
-        public DbSet<Ingredient> Ingredients { get; set; }
-        public DbSet<DishIngredient> DishIngredients { get; set; }
+        public virtual DbSet<Dish> Dishes { get; set; }
+        public virtual DbSet<Ingredient> Ingredients { get; set; }
+        public virtual DbSet<DishIngredient> DishIngredients { get; set; }
 
-        public DbSet<OrderedDish> OrderedDishes { get; set; }
-        public DbSet<OrderedDishIngredient> OrderedDishIngredients { get; set; }
+        public virtual DbSet<OrderedDish> OrderedDishes { get; set; }
+        public virtual DbSet<OrderedDishIngredient> OrderedDishIngredients { get; set; }
 
-        public DbSet<Order> Orders { get; set; }
+        public virtual DbSet<Order> Orders { get; set; }
 
-        public DbSet<Category> Categories { get; set; }
+        public virtual DbSet<Category> Categories { get; set; }
         
     }
 }
