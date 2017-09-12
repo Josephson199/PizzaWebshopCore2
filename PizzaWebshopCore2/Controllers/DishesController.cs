@@ -26,6 +26,7 @@ namespace PizzaWebshopCore2.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<DishesController> _logger;
         private readonly TransformationService _tranformationService;
+        private readonly IDatabaseService _databaseService;
         
         
 
@@ -33,7 +34,8 @@ namespace PizzaWebshopCore2.Controllers
             UserManager<ApplicationUser> userManager, 
             SignInManager<ApplicationUser> signInManager,
             ILogger<DishesController> logger,
-            TransformationService transformationService
+            TransformationService transformationService,
+            IDatabaseService databaseService
             )
         {
             _context = context;
@@ -41,19 +43,20 @@ namespace PizzaWebshopCore2.Controllers
             _signInManager = signInManager;
             _logger = logger;
             _tranformationService = transformationService;
-            
+            _databaseService = databaseService;
+
         }
 
         public IActionResult Index()
         {
-            var dishes = _context.Dishes
+            var dishes = _databaseService.GetAll<Dish>()
                 .Include(d => d.DishIngredients)
                 .ThenInclude(di => di.Ingredient)
                 .Include(d => d.Category);
 
             var dishesTransformed = _tranformationService.TranformDishesToDishModels(dishes);
 
-            var ingredients = _context.Ingredients.ToList();
+            var ingredients = _databaseService.GetAll<Ingredient>().ToList();
            
             var ingredientsTransformed = ingredients.Select(i => new IngredientModel
             {
@@ -76,13 +79,13 @@ namespace PizzaWebshopCore2.Controllers
         [Route("add-dish-to-session")]
         public JsonResult AddDishToSession([FromBody] DishJsonDto dishJsonDto)
         {
-            var dishModel = _context.Dishes
+            var dishModel = _databaseService.GetAll<Dish>()
                 .Select(d => new DishModel
                 {
                     Id = d.Id,
                     Name = d.Name,
                     Price = d.Price,
-                    Ingredients = _context.Ingredients.Where(i => dishJsonDto.IngredientIds.Contains(i.Id))
+                    Ingredients = _databaseService.GetAll<Ingredient>().Where(i => dishJsonDto.IngredientIds.Contains(i.Id))
                     .Select(i => new IngredientModel
                         {
                             Id = i.Id,
@@ -118,7 +121,7 @@ namespace PizzaWebshopCore2.Controllers
                 return Json("fail");
             }
            
-            var ingredientsModel = _context.Ingredients.Where(i => ingredientIds.Contains(i.Id))
+            var ingredientsModel = _databaseService.GetAll<Ingredient>().Where(i => ingredientIds.Contains(i.Id))
                 .Select(i => new IngredientModel
                 {
                     Id = i.Id,
@@ -227,8 +230,8 @@ namespace PizzaWebshopCore2.Controllers
 
             var order = CreateOrder(cart, aUser);
 
-            _context.Add(order);
-            _context.SaveChanges();
+            await _databaseService.AddAsync(order);
+            await _databaseService.SaveChangesAsync();
 
             _logger.LogInformation($"Saved order to database. OrderId: {order.Id}");
 
@@ -255,8 +258,8 @@ namespace PizzaWebshopCore2.Controllers
 
             var order = CreateOrder(cart, user);
 
-            _context.Add(order);
-            _context.SaveChanges();
+            await _databaseService.AddAsync(order);
+            await _databaseService.SaveChangesAsync();
 
             //email?
             HttpContext.Session.Clear();
@@ -278,7 +281,7 @@ namespace PizzaWebshopCore2.Controllers
                 Order = order,
                 OrderedDishesIngredients = d.Ingredients.Select(i => new OrderedDishIngredient
                 {
-                    Ingredient = _context.Ingredients.FirstOrDefault(ie => ie.Id == i.Id)
+                    Ingredient = _databaseService.Get<Ingredient>(i.Id)
                 }).ToList()
 
             });
