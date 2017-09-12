@@ -19,7 +19,6 @@ namespace PizzaWebshopCore2Tests
 
             //assert
             Assert.IsType<EnumerableQuery<Dish>>(res);
-            
         }
     }
 }
