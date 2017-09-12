@@ -47,7 +47,6 @@ namespace PizzaWebshopCore2Tests
             //arrange
 
             var cartModel = CreateCartModel();
-          
             
             //act
             //assert

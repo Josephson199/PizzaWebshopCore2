@@ -4,9 +4,9 @@
 
 <div class="container">
     <div class="row">
-            <form style="opacity: 0.9; margin-top: 100px;" class="col s12 m12 l6 offset-l3 blue-grey darken-1" >
+            <form asp-action="Edit" asp-controller="Account" style="opacity: 0.9; margin-top: 100px;" class="col s12 m12 l6 offset-l3 blue-grey darken-1" >
                 <div class="row">
-                    <input hidden asp-for="@Model.User.Id"/>
+                    <input value="@Model.User.Id" hidden asp-for="@Model.User.Id"/>
                     <div class="input-field col s6">
                         <input asp-for="@Model.User.FirstName" id="first_name" type="text" class="validate">
                         <label for="first_name">First Name</label>
@@ -39,12 +39,12 @@
                     </div>
                 </div>
                
-                @foreach (var role in Model.Roles)
+                @*@foreach (var role in Model.Roles)
                 {
                     <p style="display: inline;">
                         @if (Model.User.Roles.Any(r => r == role.Name))
                         {
-                            <input value="@role.Id" class="filled-in ingredient-checkbox" type="checkbox" checked="checked" id="@role.Id-role" />
+                            <input asp-for="CheckboxRoles" value="@role.Id" class="filled-in ingredient-checkbox" type="checkbox" checked="checked" id="@role.Id-role" />
                         }
                         else
                         {
@@ -54,6 +54,22 @@
                     </p>
 
 
+                }*@
+                @for (int i = 0; i < Model.CheckboxRoles.Count; i++)
+                {
+                    @Html.HiddenFor(x => Model.CheckboxRoles[i].Id, null)
+                    @Html.HiddenFor(y => Model.CheckboxRoles[i].Name, null)
+                    <p style="display: inline;">
+                        @if (Model.User.Roles.Any(r => r == Model.CheckboxRoles[i].Name))
+                        {
+                            <input asp-for="@Model.CheckboxRoles[i].IsChecked" class="filled-in" type="checkbox" checked="checked" id="@Model.CheckboxRoles[i].Id-role"/>
+                        }
+                        else
+                        {
+                            <input asp-for="@Model.CheckboxRoles[i].IsChecked" class="filled-in" type="checkbox" id="@Model.CheckboxRoles[i].Id-role"/>
+                        }
+                        <label for="@Model.CheckboxRoles[i].Id-role">@Model.CheckboxRoles[i].Name</label>
+                    </p>
                 }
                 <br />
                 <br />

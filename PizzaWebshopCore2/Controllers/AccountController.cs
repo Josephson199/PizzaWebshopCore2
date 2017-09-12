@@ -4,11 +4,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting.Internal;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PizzaWebshopCore2.Models;
 using PizzaWebshopCore2.Models.Account;
+using PizzaWebshopCore2.Models.Manage;
 
 
 namespace PizzaWebshopCore2.Controllers
@@ -116,6 +118,7 @@ namespace PizzaWebshopCore2.Controllers
         }
 
         [Route("users")]
+        [Authorize]
         public async Task<IActionResult> EditUsers()
         {
             var model = new EditUsersModel
@@ -146,6 +149,7 @@ namespace PizzaWebshopCore2.Controllers
         }
 
         [Route("users/{id}")]
+        [Authorize]
         public async Task<IActionResult> Edit(string id)
         {
             var applicationUser = _userManager.Users.FirstOrDefault(u => u.Id == id);
@@ -170,10 +174,48 @@ namespace PizzaWebshopCore2.Controllers
             var model = new EditUserModel
             {
                 User = userModel,
-                Roles = await _roleManager.Roles.ToListAsync()
+                CheckboxRoles = _roleManager.Roles.ToList().Select(i => new CheckBoxRole
+                {
+                    Id = i.Id,
+                    Name = i.Name
+                }).ToList()
             };
             
             return View(model);
+        }
+
+        [HttpPost]
+        [Route("users/{id}")]
+        [Authorize]
+        public async Task<IActionResult> Edit(EditUserModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var applicationUser = _userManager.Users.FirstOrDefault(u => u.Id == model.User.Id);
+
+            if (applicationUser == null)
+            {
+                return NotFound();
+            }
+
+            applicationUser.FirstName = model.User.FirstName;
+            applicationUser.LastName = model.User.LastName;
+            applicationUser.City = model.User.City;
+            applicationUser.PostalCode = model.User.PostalCode;
+            applicationUser.Street = model.User.Street;
+            applicationUser.Email = model.User.Email;
+
+            foreach (var role in model.CheckboxRoles.Where(cbr => cbr.IsChecked))
+            {
+                await _userManager.AddToRoleAsync(applicationUser, role.Name);
+            }
+
+            await _userManager.UpdateAsync(applicationUser);
+
+            return RedirectToAction("EditUsers");
         }
     }
 }
