@@ -1,17 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting.Internal;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using PizzaWebshopCore2.Models;
 using PizzaWebshopCore2.Models.Account;
-using PizzaWebshopCore2.Models.Manage;
-
 
 namespace PizzaWebshopCore2.Controllers
 {
@@ -74,6 +68,7 @@ namespace PizzaWebshopCore2.Controllers
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
+            HttpContext.Session.Clear();
             return RedirectToAction(nameof(HomeController.Index), "Home");
         }
 
@@ -113,7 +108,7 @@ namespace PizzaWebshopCore2.Controllers
                 ModelState.AddModelError(string.Empty, "Invalid register attempt.");
             }
 
-            
+            HttpContext.Session.Clear();
             return View(model);
         }
 

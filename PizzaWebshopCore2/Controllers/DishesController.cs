@@ -294,7 +294,6 @@ namespace PizzaWebshopCore2.Controllers
 
         private CartModel AddToSession(DishModel dishModel)
         {
-
             var cartSession = HttpContext.Session.GetString(SessionKeyName);
 
             CartModel cart;
@@ -304,7 +303,6 @@ namespace PizzaWebshopCore2.Controllers
                 cart = new CartModel
                 {
                     Dishes = new List<DishModel> { dishModel }
-
                 };
 
                 var serializedCart = JsonConvert.SerializeObject(cart);
