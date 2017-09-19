@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.AzureAppServices;
 using PizzaWebshopCore2.Data;
 using PizzaWebshopCore2.Models;
 using PizzaWebshopCore2.Services;
@@ -15,17 +17,25 @@ namespace PizzaWebshopCore2
     {
         public IConfiguration Configuration { get; }
         private readonly IHostingEnvironment _environment;
+        private readonly ILoggerFactory _loggerFactory;
 
-        public Startup(IConfiguration configuration, IHostingEnvironment environment)
+        public Startup(IConfiguration configuration, IHostingEnvironment environment, ILoggerFactory loggerFactory)
         {
             Configuration = configuration;
             _environment = environment;
+            _loggerFactory = loggerFactory;
 
         }
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            if (_environment.IsProduction())
+                _loggerFactory.AddAzureWebAppDiagnostics(
+                    new AzureAppServicesDiagnosticsSettings
+                    {
+                        OutputTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss zzz} [{Level}] {RequestId}-{SourceContext}: {Message}{NewLine}{Exception}"
+                    });
 
             if (_environment.IsProduction() || _environment.IsStaging())
                 services.AddDbContext<ApplicationDbContext>(options =>
