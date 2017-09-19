@@ -14,17 +14,29 @@ namespace PizzaWebshopCore2
     public class Startup
     {
         public IConfiguration Configuration { get; }
+        private readonly IHostingEnvironment _environment;
 
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IHostingEnvironment environment)
         {
             Configuration = configuration;
+            _environment = environment;
+
         }
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseInMemoryDatabase("DefaultConnection"));
+
+            if (_environment.IsProduction() || _environment.IsStaging())
+                services.AddDbContext<ApplicationDbContext>(options =>
+                    options.UseSqlServer("Server=localhost\\SQLEXPRESS;Database=Pizzeria;Trusted_Connection=True;"));
+            else
+                services.AddDbContext<ApplicationDbContext>(options =>
+                    options.UseInMemoryDatabase("DefaultConnection"));
+
+
+            //services.AddDbContext<ApplicationDbContext>(options =>
+            //    options.UseInMemoryDatabase("DefaultConnection"));
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -64,7 +76,9 @@ namespace PizzaWebshopCore2
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
-
+            if (_environment.IsProduction() || _environment.IsStaging())
+                context.Database.Migrate();
+           
             DbInitializer.Initialize(userManager, context, roleManager);
         }
     }
