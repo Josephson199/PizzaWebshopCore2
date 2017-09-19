@@ -37,9 +37,12 @@ namespace PizzaWebshopCore2
                         OutputTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss zzz} [{Level}] {RequestId}-{SourceContext}: {Message}{NewLine}{Exception}"
                     });
 
-            if (_environment.IsProduction() || _environment.IsStaging())
+            if (_environment.IsStaging())
                 services.AddDbContext<ApplicationDbContext>(options =>
                     options.UseSqlServer("Server=localhost\\SQLEXPRESS;Database=Pizzeria;Trusted_Connection=True;"));
+            if(_environment.IsProduction())
+                services.AddDbContext<ApplicationDbContext>(options =>
+                    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             else
                 services.AddDbContext<ApplicationDbContext>(options =>
                     options.UseInMemoryDatabase("DefaultConnection"));
